@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模拟桌面</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', 'JetBrains Mono', sans-serif; overflow: hidden; height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+    .desktop { width: 100%; height: 100%; position: relative; background: radial-gradient(ellipse at 20% 80%, rgba(78, 205, 196, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 50%), linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+    .desktop-icons { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 24px; }
+    .desktop-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border-radius: 8px; transition: all 0.2s ease; width: 80px; }
+    .desktop-icon:hover { background: rgba(255, 255, 255, 0.08); transform: scale(1.05); }
+    .desktop-icon:active { transform: scale(0.98); }
+    .icon-image { width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(145deg, #e94560, #c73e54); display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4); }
+    .icon-image.copilot-icon { background: linear-gradient(145deg, #7c3aed, #a78bfa); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5); }
+    .icon-image.vote-icon { background: linear-gradient(145deg, #f59e0b, #fbbf24); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5); }
+    .icon-label { color: rgba(255, 255, 255, 0.9); font-size: 12px; text-align: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+    .taskbar { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+    .taskbar-start { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(145deg, #4ecdc4, #44a08d); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+    .taskbar-time { margin-left: auto; color: rgba(255, 255, 255, 0.8); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .app-window { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 90vw; height: auto; background: rgba(26, 26, 46, 0.95); border-radius: 12px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08); overflow: hidden; display: none; flex-direction: column; z-index: 100; transition: all 0.25s ease; }
+    .app-window.open { display: flex; animation: windowOpen 0.3s ease; }
+    .app-window.fullscreen { top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none; border-radius: 0; z-index: 101; }
+    .app-window.fullscreen .chat-messages, .app-window.fullscreen .search-results { max-height: none; flex: 1; }
+    .app-window.copilot-window { height: 520px; }
+    @keyframes windowOpen { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    .window-titlebar { height: 36px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+    .window-buttons { display: flex; gap: 6px; }
+    .window-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
+    .window-btn.close { background: #ff5f56; }
+    .window-btn.minimize { background: #ffbd2e; }
+    .window-btn.maximize { background: #27c93f; }
+    .window-title { flex: 1; text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 12px; }
+    .window-content { padding: 40px 32px; flex: 1; }
+    .chat-window { display: flex; flex-direction: column; height: 100%; padding: 16px 0; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px 0; max-height: 320px; display: flex; flex-direction: column; gap: 16px; }
+    .chat-msg { display: flex; gap: 12px; align-items: flex-start; }
+    .chat-msg.user .chat-msg-content { background: rgba(78, 205, 196, 0.2); border-color: rgba(78, 205, 196, 0.3); }
+    .chat-msg.assistant .chat-msg-avatar { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(145deg, #7c3aed, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .chat-msg-content { padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.9); font-size: 14px; line-height: 1.6; max-width: 85%; }
+    .chat-msg.user { flex-direction: row-reverse; }
+    .chat-msg.user .chat-msg-content { max-width: 75%; }
+    .chat-input-area { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+    .chat-input { flex: 1; padding: 12px 18px; font-size: 14px; border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 24px; background: rgba(255, 255, 255, 0.05); color: #fff; outline: none; transition: all 0.2s ease; }
+    .chat-input:focus { border-color: #7c3aed; background: rgba(255, 255, 255, 0.08); }
+    .chat-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .chat-send-btn { padding: 12px 24px; border: none; border-radius: 24px; background: linear-gradient(145deg, #7c3aed, #a78bfa); color: #fff; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .chat-send-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
+    .chat-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .provider-select { display: flex; align-items: center; gap: 10px; padding: 8px 0; margin-bottom: 8px; }
+    .provider-select label { color: rgba(255,255,255,0.6); font-size: 13px; }
+    .provider-select select { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; font-size: 13px; cursor: pointer; }
+    .chat-welcome { text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; padding: 24px; }
+    .chat-welcome strong { color: rgba(255, 255, 255, 0.8); }
+    .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; }
+    .typing-indicator span { width: 6px; height: 6px; background: #a78bfa; border-radius: 50%; animation: typing 1.4s infinite ease-in-out; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .search-logo { text-align: center; margin-bottom: 32px; }
+    .search-logo h1 { font-size: 42px; font-weight: 600; background: linear-gradient(135deg, #4ecdc4, #e94560); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; }
+    .search-box-container { position: relative; margin-bottom: 24px; }
+    .search-input { width: 100%; padding: 14px 20px 14px 48px; font-size: 16px; border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 24px; background: rgba(255, 255, 255, 0.05); color: #fff; outline: none; transition: all 0.2s ease; }
+    .search-input:focus { border-color: #4ecdc4; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2); }
+    .search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.6; }
+    .search-buttons { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; }
+    .search-btn { padding: 10px 24px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); transition: all 0.2s ease; }
+    .search-btn:hover { background: rgba(78, 205, 196, 0.3); color: #fff; }
+    .suggestions { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; }
+    .suggestions-title { color: rgba(255, 255, 255, 0.5); font-size: 12px; margin-bottom: 12px; }
+    .suggestion-item { padding: 10px 0; color: rgba(255, 255, 255, 0.7); font-size: 14px; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 10px; }
+    .suggestion-item:hover { color: #4ecdc4; }
+    .suggestion-item::before { content: "🔍"; font-size: 14px; }
+    .search-results { display: none; margin-top: 20px; max-height: 300px; overflow-y: auto; }
+    .search-results.show { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .results-header { color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 8px; }
+    .result-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); cursor: pointer; transition: background 0.2s; }
+    .result-item:hover { background: rgba(78, 205, 196, 0.1); }
+    .result-title { color: #4ecdc4; font-size: 14px; margin-bottom: 4px; }
+    .result-url { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-bottom: 4px; }
+    .result-snippet { color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.4; }
+    .back-to-search { margin-bottom: 16px; color: #4ecdc4; cursor: pointer; font-size: 13px; }
+    .back-to-search:hover { text-decoration: underline; }
+    .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: none; z-index: 99; }
+    .overlay.show { display: block; }
+    .search-home { display: block; }
+    .search-home.hidden { display: none; }
+    .vote-app { padding: 24px 0; }
+    .vote-title { font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 20px; text-align: center; }
+    .vote-list { display: flex; flex-direction: column; gap: 16px; }
+    .vote-item { padding: 14px 18px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: all 0.2s; }
+    .vote-item:hover { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+    .vote-item-label { color: rgba(255,255,255,0.9); font-size: 15px; flex: 1; }
+    .vote-item-count { color: rgba(255,255,255,0.5); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="desktop">
+    <div class="desktop-icons">
+      <div class="desktop-icon" id="searchApp" title="点击打开搜索引擎">
+        <div class="icon-image">🔎</div>
+        <span class="icon-label">Vibe搜索</span>
+      </div>
+      <div class="desktop-icon" id="copilotApp" title="点击打开 AI 助手">
+        <div class="icon-image copilot-icon">✨</div>
+        <span class="icon-label">Copilot</span>
+      </div>
+      <div class="desktop-icon" id="voteApp" title="点击打开投票">
+        <div class="icon-image vote-icon">🗳️</div>
+        <span class="icon-label">投票</span>
+      </div>
+    </div>
+    <div class="taskbar">
+      <div class="taskbar-start">⊞</div>
+      <span class="taskbar-time" id="clock">00:00</span>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="app-window" id="searchWindow">
+    <div class="window-titlebar">
+      <div class="window-buttons">
+        <button class="window-btn close" id="closeBtn"></button>
+        <button class="window-btn minimize"></button>
+        <button class="window-btn maximize"></button>
+      </div>
+      <span class="window-title">Vibe搜索 - 模拟搜索引擎</span>
+    </div>
+    <div class="window-content">
+      <div class="search-home" id="searchHome">
+        <div class="search-logo"><h1>Vibe Search</h1></div>
+        <div class="search-box-container">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="输入关键词搜索..." autocomplete="off">
+        </div>
+        <div class="search-buttons">
+          <button class="search-btn" id="searchBtn">Vibe 搜索</button>
+          <button class="search-btn" id="luckyBtn">手气不错</button>
+        </div>
+        <div class="suggestions">
+          <div class="suggestions-title">热门搜索建议</div>
+          <div class="suggestion-item" data-query="人工智能最新进展">人工智能最新进展</div>
+          <div class="suggestion-item" data-query="2025年科技趋势">2025年科技趋势</div>
+          <div class="suggestion-item" data-query="机器学习入门教程">机器学习入门教程</div>
+          <div class="suggestion-item" data-query="前端开发最佳实践">前端开发最佳实践</div>
+        </div>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="back-to-search" id="backToSearch">← 返回搜索</div>
+        <div class="results-header" id="resultsHeader">约 0 条结果</div>
+        <div id="resultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-window copilot-window" id="voteWindow">
+    <div class="window-titlebar">
+      <div class="window-buttons">
+        <button class="window-btn close" id="voteCloseBtn"></button>
+        <button class="window-btn minimize"></button>
+        <button class="window-btn maximize"></button>
+      </div>
+      <span class="window-title">投票</span>
+    </div>
+    <div class="window-content">
+      <div class="vote-app">
+        <div class="vote-title">投票</div>
+        <div class="vote-list" id="voteList">
+          <!-- 在此处添加三个投票选项 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-window copilot-window" id="copilotWindow">
+    <div class="window-titlebar">
+      <div class="window-buttons">
+        <button class="window-btn close" id="copilotCloseBtn"></button>
+        <button class="window-btn minimize"></button>
+        <button class="window-btn maximize"></button>
+      </div>
+      <span class="window-title">Copilot - AI 助手 (GPT-5.1)</span>
+    </div>
+    <div class="window-content">
+      <div class="chat-window">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-welcome" id="chatWelcome">
+            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>基于 GPT-5.1 模型，有什么可以帮你的？
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <div class="provider-select">
+            <label>通道：</label>
+            <select id="providerSelect">
+              <option value="relay">学顶猫中转</option>
+              <option value="openai">直连 OpenAI</option>
+            </select>
+          </div>
+          <input type="text" class="chat-input" id="chatInput" placeholder="输入你的问题..." autocomplete="off">
+          <button class="chat-send-btn" id="chatSendBtn">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const searchApp = document.getElementById('searchApp');
+    const searchWindow = document.getElementById('searchWindow');
+    const copilotApp = document.getElementById('copilotApp');
+    const copilotWindow = document.getElementById('copilotWindow');
+    const voteApp = document.getElementById('voteApp');
+    const voteWindow = document.getElementById('voteWindow');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
+    const copilotCloseBtn = document.getElementById('copilotCloseBtn');
+    const voteCloseBtn = document.getElementById('voteCloseBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const suggestionItems = document.querySelectorAll('.suggestion-item');
+
+    function updateClock() {
+      document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    searchApp.addEventListener('click', () => { searchWindow.classList.add('open'); overlay.classList.add('show'); showHome(); searchInput.focus(); });
+    copilotApp.addEventListener('click', () => { copilotWindow.classList.add('open'); overlay.classList.add('show'); document.getElementById('chatInput').focus(); });
+    voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); });
+
+    function toggleFullscreen(win) {
+      win.classList.toggle('fullscreen');
+    }
+    searchWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(searchWindow); });
+    copilotWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(copilotWindow); });
+    voteWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(voteWindow); });
+
+    function closeWindow() { searchWindow.classList.remove('open'); copilotWindow.classList.remove('open'); voteWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); copilotWindow.classList.remove('fullscreen'); voteWindow.classList.remove('fullscreen'); overlay.classList.remove('show'); }
+    closeBtn.addEventListener('click', () => { searchWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); if (!copilotWindow.classList.contains('open') && !voteWindow.classList.contains('open')) overlay.classList.remove('show'); });
+    copilotCloseBtn.addEventListener('click', () => { copilotWindow.classList.remove('open'); copilotWindow.classList.remove('fullscreen'); if (!searchWindow.classList.contains('open') && !voteWindow.classList.contains('open')) overlay.classList.remove('show'); });
+    voteCloseBtn.addEventListener('click', () => { voteWindow.classList.remove('open'); voteWindow.classList.remove('fullscreen'); if (!searchWindow.classList.contains('open') && !copilotWindow.classList.contains('open')) overlay.classList.remove('show'); });
+    overlay.addEventListener('click', closeWindow);
+
+    const searchHome = document.getElementById('searchHome');
+    const searchResults = document.getElementById('searchResults');
+    const resultsList = document.getElementById('resultsList');
+    const resultsHeader = document.getElementById('resultsHeader');
+    const backToSearch = document.getElementById('backToSearch');
+    const luckyBtn = document.getElementById('luckyBtn');
+
+    const mockResults = [
+      { title: '关于「{{query}}」的百科介绍', url: 'https://vibe-search.example/wiki/{{query}}', snippet: '这是一个模拟的搜索结果。' },
+      { title: '{{query}} - 官方文档', url: 'https://docs.vibe-search.example/{{query}}', snippet: '深入了解相关主题的详细文档和教程。' },
+      { title: '{{query}} 最新动态与资讯', url: 'https://news.vibe-search.example/{{query}}', snippet: '获取最新的行业资讯、技术更新。' }
+    ];
+
+    function generateResults(q) { return mockResults.map(r => ({ title: r.title.replace(/\{\{query\}\}/g, q), url: r.url.replace(/\{\{query\}\}/g, encodeURIComponent(q)), snippet: r.snippet.replace(/\{\{query\}\}/g, q) })); }
+
+    function doSearch(q) {
+      if (!q.trim()) return;
+      const results = generateResults(q);
+      searchHome.classList.add('hidden');
+      searchResults.classList.add('show');
+      resultsHeader.textContent = '约 ' + results.length + ' 条结果 (模拟)';
+      resultsList.innerHTML = results.map(r => '<div class="result-item"><div class="result-title">' + r.title + '</div><div class="result-url">' + r.url + '</div><div class="result-snippet">' + r.snippet + '</div></div>').join('');
+    }
+
+    function showHome() { searchHome.classList.remove('hidden'); searchResults.classList.remove('show'); }
+    backToSearch.addEventListener('click', showHome);
+    luckyBtn.addEventListener('click', () => { const q = ['人工智能','机器学习','前端开发'][Math.floor(Math.random()*3)]; searchInput.value = q; doSearch(q); });
+    searchBtn.addEventListener('click', () => doSearch(searchInput.value));
+    searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(searchInput.value); });
+    suggestionItems.forEach(item => { item.addEventListener('click', () => { searchInput.value = item.getAttribute('data-query'); doSearch(searchInput.value); }); });
+
+    const chatMessages = document.getElementById('chatMessages');
+    const chatWelcome = document.getElementById('chatWelcome');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const providerSelect = document.getElementById('providerSelect');
+    let chatHistory = [];
+
+    try { const saved = localStorage.getItem('aiProvider'); if (saved) providerSelect.value = saved; } catch (_) {}
+    providerSelect.addEventListener('change', () => { try { localStorage.setItem('aiProvider', providerSelect.value); } catch (_) {} });
+
+    function addMessage(role, content) {
+      chatWelcome.style.display = 'none';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-msg ' + role;
+      if (role === 'assistant') {
+        msgDiv.innerHTML = '<div class="chat-msg-avatar">✨</div><div class="chat-msg-content"></div>';
+        msgDiv.querySelector('.chat-msg-content').textContent = content;
+      } else {
+        msgDiv.innerHTML = '<div class="chat-msg-content">' + content.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+      }
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+      const div = document.createElement('div');
+      div.className = 'chat-msg assistant';
+      div.id = 'typingIndicator';
+      div.innerHTML = '<div class="chat-msg-avatar">✨</div><div class="typing-indicator"><span></span><span></span><span></span></div>';
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = '';
+      chatSendBtn.disabled = true;
+      addMessage('user', text);
+      chatHistory.push({ role: 'user', content: text });
+      addTypingIndicator();
+      try {
+        const provider = document.getElementById('providerSelect').value;
+        const res = await fetch(window.location.origin + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory, provider }) });
+        const data = await res.json();
+        document.getElementById('typingIndicator')?.remove();
+        if (!res.ok) { addMessage('assistant', '❌ ' + (data.error || '请检查 .env 中是否已设置 OPENAI_API_KEY')); return; }
+        addMessage('assistant', data.content);
+        chatHistory.push({ role: 'assistant', content: data.content });
+      } catch (err) {
+        document.getElementById('typingIndicator')?.remove();
+        addMessage('assistant', '❌ 网络错误：' + err.message + '。请确保已运行 npm start 启动服务。');
+      } finally { chatSendBtn.disabled = false; chatInput.focus(); }
+    }
+
+    chatSendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+  </script>
+</body>
+</html>
