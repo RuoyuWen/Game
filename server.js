@@ -5,7 +5,7 @@ const OpenAI = require('openai');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // API 配置 - 学顶猫中转 + 直连 OpenAI 双通道
 const model = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';

@@ -24,6 +24,8 @@
     .app-window.open { display: flex; animation: windowOpen 0.3s ease; }
     .app-window.fullscreen { top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none; border-radius: 0; z-index: 101; }
     .app-window.fullscreen .chat-messages, .app-window.fullscreen .search-results { max-height: none; flex: 1; }
+.app-window.fullscreen .wiki-view { flex: 1; }
+.app-window.fullscreen .wiki-article { max-height: none; }
     .app-window.copilot-window { height: 520px; }
     @keyframes windowOpen { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
     .window-titlebar { height: 36px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
@@ -69,22 +71,29 @@
     .search-buttons { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; }
     .search-btn { padding: 10px 24px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); transition: all 0.2s ease; }
     .search-btn:hover { background: rgba(78, 205, 196, 0.3); color: #fff; }
-    .suggestions { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; }
-    .suggestions-title { color: rgba(255, 255, 255, 0.5); font-size: 12px; margin-bottom: 12px; }
-    .suggestion-item { padding: 10px 0; color: rgba(255, 255, 255, 0.7); font-size: 14px; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 10px; }
-    .suggestion-item:hover { color: #4ecdc4; }
-    .suggestion-item::before { content: "🔍"; font-size: 14px; }
     .search-results { display: none; margin-top: 20px; max-height: 300px; overflow-y: auto; }
     .search-results.show { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .results-header { color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 8px; }
     .result-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); cursor: pointer; transition: background 0.2s; }
     .result-item:hover { background: rgba(78, 205, 196, 0.1); }
+    .result-item[data-wiki] .result-title::before { content: '📖 '; }
     .result-title { color: #4ecdc4; font-size: 14px; margin-bottom: 4px; }
     .result-url { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-bottom: 4px; }
     .result-snippet { color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.4; }
     .back-to-search { margin-bottom: 16px; color: #4ecdc4; cursor: pointer; font-size: 13px; }
     .back-to-search:hover { text-decoration: underline; }
+    .wiki-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .wiki-view.show { display: flex; }
+    .wiki-article { flex: 1; overflow-y: auto; padding: 0 4px 24px 0; color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.7; max-height: 460px; min-height: 200px; }
+    .wiki-emblem { width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+    .wiki-emblem svg { width: 100%; height: 100%; }
+    .wiki-article h1 { font-size: 22px; margin: 0 0 8px 0; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+    #searchWindow.wiki-mode { height: 560px; }
+    .wiki-article h2 { font-size: 16px; margin: 20px 0 10px 0; color: #4ecdc4; }
+    .wiki-article p { margin: 0 0 12px 0; }
+    .wiki-article ul { margin: 0 0 12px 0; padding-left: 22px; }
+    .wiki-article li { margin-bottom: 4px; }
     .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: none; z-index: 99; }
     .overlay.show { display: block; }
     .search-home { display: block; }
@@ -142,18 +151,15 @@
           <button class="search-btn" id="searchBtn">Vibe 搜索</button>
           <button class="search-btn" id="luckyBtn">手气不错</button>
         </div>
-        <div class="suggestions">
-          <div class="suggestions-title">热门搜索建议</div>
-          <div class="suggestion-item" data-query="人工智能最新进展">人工智能最新进展</div>
-          <div class="suggestion-item" data-query="2025年科技趋势">2025年科技趋势</div>
-          <div class="suggestion-item" data-query="机器学习入门教程">机器学习入门教程</div>
-          <div class="suggestion-item" data-query="前端开发最佳实践">前端开发最佳实践</div>
-        </div>
       </div>
       <div class="search-results" id="searchResults">
         <div class="back-to-search" id="backToSearch">← 返回搜索</div>
         <div class="results-header" id="resultsHeader">约 0 条结果</div>
         <div id="resultsList"></div>
+      </div>
+      <div class="wiki-view" id="wikiView">
+        <div class="back-to-search" id="backFromWiki">← 返回搜索</div>
+        <div class="wiki-article" id="wikiArticle"></div>
       </div>
     </div>
   </div>
@@ -221,7 +227,6 @@
     const voteCloseBtn = document.getElementById('voteCloseBtn');
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    const suggestionItems = document.querySelectorAll('.suggestion-item');
 
     function updateClock() {
       document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -253,29 +258,177 @@
     const backToSearch = document.getElementById('backToSearch');
     const luckyBtn = document.getElementById('luckyBtn');
 
+    const WIKI_DATA = {
+      pa: {
+        id: 'pa',
+        title: '进步联盟（Progressive Alliance，PA）',
+        emblem: '<div class="wiki-emblem"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="26" fill="none" stroke="#2ecc71" stroke-width="2"/><ellipse cx="32" cy="32" rx="10" ry="18" fill="#2ecc71"/><ellipse cx="32" cy="28" rx="6" ry="12" fill="#27ae60"/></svg></div>',
+        keywords: ['进步联盟', 'PA', 'Progressive Alliance', '诺兰德', '政党', '中左翼', '社会公平', '环境保护', '公共服务', '劳工', '可再生能源', '气候变化', '住房', '医疗', '教育', '累进税', '城市居民', '大学生'],
+        snippet: '诺兰德中左翼政党，主张社会公平、环境保护以及完善的公共服务体系。',
+        content: `<h1>进步联盟（Progressive Alliance，PA）</h1>
+<h2>概述</h2>
+<p>进步联盟（Progressive Alliance，PA）是诺兰德（Norland）的一个中左翼政党，主张社会公平、环境保护以及完善的公共服务体系。该党成立于1987年，由多个劳工组织与环境运动团体合并而成。</p>
+<p>进步联盟主张政府在减少社会不平等和应对长期社会问题方面发挥积极作用，例如气候变化、住房负担能力以及医疗体系压力等议题。该党通常在年轻选民、公共部门从业者以及大城市居民中拥有较高支持度。</p>
+<h2>政治理念</h2>
+<p>进步联盟强调通过公共政策促进社会公平与可持续发展。主要政策理念包括：</p>
+<ul><li>扩大公共医疗与教育投入</li><li>推动气候行动与可再生能源转型</li><li>实施累进税制</li><li>增加可负担住房建设</li></ul>
+<p>该党认为，长期经济繁荣需要减少社会不平等，并通过公共投资提升社会整体基础设施与生活质量。批评者则认为，这些政策可能导致政府支出和税收水平上升。</p>
+<h2>党派历史</h2>
+<p>进步联盟成立于20世纪80年代末，当时多个劳工组织和环境团体联合起来，回应社会不平等扩大和环境问题日益突出的局面。在2000年代初，该党因提出全国可再生能源计划而逐渐获得关注。2012年，进步联盟首次进入执政联盟，并推动通过了多项公共医疗和教育相关改革。近年来，该党将政策重点放在气候变化和住房可负担性问题上。</p>
+<h2>选民基础</h2>
+<p>研究显示，该党通常在以下群体中支持率较高：城市居民、大学生及高学历群体、公共部门从业人员、环境保护相关组织支持者。在部分农村地区和商业界人士中的支持度相对较低。</p>
+<h2>主要政策领域</h2>
+<p><strong>气候与能源</strong>：支持快速推进可再生能源发展，并主张实施碳定价机制。</p>
+<p><strong>社会福利</strong>：倡导扩大社会保障体系，例如住房补贴和失业救助。</p>
+<p><strong>教育政策</strong>：政策重点包括提高高等教育资金投入以及减轻学生贷款负担。</p>
+<h2>批评与争议</h2>
+<p>反对者认为，进步联盟的一些政策可能增加税收和政府支出，并对企业运营成本产生影响。部分商业组织也担心更严格的环境监管可能影响产业竞争力。支持者则认为，这些政策对于解决长期社会和环境问题具有必要性。</p>`
+      },
+      erp: {
+        id: 'erp',
+        title: '经济改革党（Economic Reform Party，ERP）',
+        emblem: '<div class="wiki-emblem"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="none" stroke="#3498db" stroke-width="2"/><rect x="18" y="38" width="8" height="14" fill="#3498db"/><rect x="28" y="28" width="8" height="24" fill="#2980b9"/><rect x="38" y="16" width="8" height="36" fill="#1abc9c"/></svg></div>',
+        keywords: ['经济改革党', 'ERP', 'Economic Reform Party', '诺兰德', '政党', '中右翼', '经济增长', '市场经济', '商业环境', '减税', '科技创新', '企业家', '基础设施', '数字化'],
+        snippet: '诺兰德中右翼政党，强调经济增长、市场效率以及良好的商业环境。',
+        content: `<h1>经济改革党（Economic Reform Party，ERP）</h1>
+<h2>概述</h2>
+<p>经济改革党（Economic Reform Party，ERP）是诺兰德的一个中右翼政党，强调经济增长、市场效率以及良好的商业环境。该党成立于1995年，主张通过促进投资、提高生产效率以及支持科技创新来推动经济发展。经济改革党通常在企业界、私营部门专业人士以及关注经济竞争力的选民中拥有较高支持度。</p>
+<h2>政治理念</h2>
+<p>经济改革党倡导以市场为导向的经济政策，同时保持一定程度的社会政策支持。核心理念包括：通过减税促进投资与就业、改善商业监管环境、加强基础设施建设、支持科技创新与创业。该党认为，经济增长是提高社会整体生活水平的重要基础。批评者则认为，这些政策可能削弱公共服务资金或扩大收入差距。</p>
+<h2>党派历史</h2>
+<p>经济改革党成立于1990年代中期，当时诺兰德正在经历经济结构调整。该党通过倡导提升国际竞争力和吸引外资的政策逐渐获得支持。2004年，经济改革党首次进入执政联盟，并推动实施了一系列企业税收改革和基础设施建设计划。近年来，该党将政策重点放在科技创新、数字经济和产业发展上。</p>
+<h2>选民基础</h2>
+<p>该党通常在以下群体中获得较高支持：企业家和中小企业主、金融与科技行业从业者、郊区居民、注重经济增长和就业机会的选民。在部分劳工组织和社会倡议团体中的支持度相对较低。</p>
+<h2>主要政策领域</h2>
+<p><strong>经济政策</strong>：支持降低企业税率并简化商业监管。</p>
+<p><strong>科技与创新</strong>：鼓励政府与科技企业合作，并支持增加研发投入。</p>
+<p><strong>基础设施</strong>：政策重点包括交通网络和数字基础设施建设。</p>
+<h2>批评与争议</h2>
+<p>批评者认为，减税和监管放松可能减少政府财政收入，从而影响社会福利项目。部分环保组织也担心相关政策可能削弱环境监管力度。支持者则认为，推动经济增长和技术创新对于国家长期发展至关重要。</p>`
+      },
+      cfm: {
+        id: 'cfm',
+        title: '社区优先运动（Community First Movement，CFM）',
+        emblem: '<div class="wiki-emblem"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="none" stroke="#f39c12" stroke-width="2"/><path d="M32 20 L52 42 L52 54 L12 54 L12 42 Z" fill="#f39c12"/><rect x="26" y="42" width="12" height="12" fill="#e67e22"/></svg></div>',
+        keywords: ['社区优先运动', 'CFM', 'Community First Movement', '诺兰德', '政党', '中间派', '社区', '地方治理', '住房', '医疗', '地方政府', '小城镇', '务实'],
+        snippet: '诺兰德中间派政党，强调社区福祉、地方治理以及均衡发展。',
+        content: `<h1>社区优先运动（Community First Movement，CFM）</h1>
+<h2>概述</h2>
+<p>社区优先运动（Community First Movement，CFM）是诺兰德的一个中间派政党，强调社区福祉、地方治理以及均衡发展。该党成立于2008年，由多位地方政府领导人发起，他们认为国家层面的政策决策逐渐脱离地方社区的实际需求。CFM主张通过强化地方政府权力、改善社区医疗服务以及稳定住房市场来提升居民生活质量。</p>
+<h2>政治理念</h2>
+<p>社区优先运动倡导务实、以社区为中心的政治理念。主要政策方向包括：加强地方政府决策权、改善社区公共服务、稳定住房市场、提高区域医疗资源可及性。该党通常将自己定位为一种相对温和、务实的政治选择。</p>
+<h2>党派历史</h2>
+<p>社区优先运动最初由多位地方市长和地区代表组成，他们主张在国家治理体系中加强地方自治权。2016年大选期间，该党通过关注住房问题和区域医疗服务而获得全国关注。此后，该党逐步扩展政策议题，包括食品安全、社区经济以及地方基础设施建设等。</p>
+<h2>选民基础</h2>
+<p>该党通常在以下群体中获得较高支持：小城镇和区域居民、关注医疗和养老问题的中老年选民、社区组织成员、倾向于温和政策立场的选民。在政治立场较为明确的意识形态选民中支持度相对较低。</p>
+<h2>主要政策领域</h2>
+<p><strong>住房政策</strong>：主张限制投机性房地产投资，并为首次购房者提供更多支持。</p>
+<p><strong>社区医疗</strong>：支持建设更多地方医疗中心，改善偏远地区医疗服务。</p>
+<p><strong>地方治理</strong>：倡导将部分政策决策权从中央政府下放到地方政府。</p>
+<h2>批评与争议</h2>
+<p>一些批评者认为，该党缺乏明确的国家层面经济战略，并过于强调地方事务。也有人担心地方权力扩大可能导致政策执行在不同地区之间出现差异。支持者则认为，加强地方治理能够使政策更贴近社区实际需求。</p>`
+      },
+      norland: {
+        id: 'norland',
+        title: '诺兰德（Norland）',
+        emblem: '<div class="wiki-emblem"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="26" fill="none" stroke="#9b59b6" stroke-width="2"/><path d="M32 14 L36 26 L48 26 L40 34 L44 46 L32 38 L20 46 L24 34 L16 26 L28 26 Z" fill="#9b59b6"/></svg></div>',
+        keywords: ['诺兰德', 'Norland', '阿尔维斯', '雷恩港', '诺兰语', '议会民主', '民主制', '首都', '选举', '三大政党'],
+        snippet: '位于北半球的发达民主国家，人口约3200万，实行议会民主制。',
+        content: `<h1>诺兰德（Norland）</h1>
+<h2>国家概况</h2>
+<p>诺兰德（Norland）是位于北半球的一座发达民主国家，人口约3200万。该国以稳定的民主制度、高水平教育体系以及多元化经济结构而闻名。诺兰德实行议会民主制（parliamentary democracy），政府由议会多数党或执政联盟组成。</p>
+<p>首都为阿尔维斯（Alvis），是全国的政治和行政中心。最大的城市是雷恩港（Port Rhein），同时也是金融和科技产业的重要枢纽。诺兰德的官方语言为诺兰语（Norlish），英语在商业和高等教育中也被广泛使用。</p>
+<h2>地理与环境</h2>
+<p>诺兰德国土面积约28万平方公里，地理环境多样，包括沿海平原、丘陵地带以及北部山脉。主要地理区域包括：北部山区（矿产资源丰富，重要的水电能源区）、中部农业带（全国主要粮食和农产品产区）、东部沿海城市群（工业、贸易和科技产业集中地区）、南部森林地区（生态保护区与旅游目的地）。</p>
+<p>诺兰德近年来受到气候变化影响，包括海平面上升和极端天气事件增多，因此环境政策成为国家政治的重要议题之一。</p>
+<h2>人口与社会</h2>
+<p>诺兰德人口约3200万，城市化率约78%。人口结构特点包括：18–35岁年轻人口比例较高、中产阶级占人口多数、移民人口约占总人口的15%。诺兰德社会普遍重视教育与社会福利，大学入学率较高。国家医疗体系为公共医疗为主、私人医疗为辅的混合体系。近年来，住房价格上涨和生活成本问题成为社会讨论的焦点。</p>
+<h2>经济结构</h2>
+<p>诺兰德属于高收入经济体，人均GDP约48,000美元。主要产业包括：科技与软件产业、高端制造业、可再生能源、农业与食品加工、金融与商业服务。过去十年，诺兰德政府积极推动数字经济与人工智能产业发展，多个国际科技公司在该国设立研发中心。然而，经济发展也带来一些挑战，例如房价持续上涨、区域发展不平衡、自动化对部分就业岗位的影响。</p>
+<h2>政治制度</h2>
+<p>诺兰德实行议会制民主（Parliamentary Democracy）。主要特点包括：每四年举行一次全国大选、选民投票选举议会议员、获得多数席位的政党或政党联盟组建政府、总理由执政党领袖担任。诺兰德通常存在多党竞争格局，但近年来主要由三大政党在选举中竞争。</p>
+<h2>当前社会议题</h2>
+<p>在最近的选举周期中，诺兰德社会讨论较多的议题包括：经济增长（部分经济指标增长放缓，如何保持创新和投资成为重要议题）、住房问题（大城市房价持续上涨，使年轻人购房难度增加）、气候变化（极端天气和能源转型问题促使政府考虑更严格的环境政策）、医疗系统压力（人口老龄化使公共医疗系统面临资源分配挑战）。</p>
+<h2>选举背景</h2>
+<p>今年是诺兰德全国议会选举年。民调显示三大政党的支持率非常接近，选举结果具有较大不确定性。主要参与竞争的政党包括：进步联盟（PA）、经济改革党（ERP）、社区优先运动（CFM）。每个政党在经济、环境、社会福利以及地方治理等问题上提出不同政策方案。对于许多年轻选民来说，这次选举也是他们第一次参与投票。</p>`
+      }
+    };
+
+    function matchWiki(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const k of Object.keys(WIKI_DATA)) {
+        const w = WIKI_DATA[k];
+        const allText = [w.title, ...w.keywords].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || w.keywords.some(kw => kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase()));
+        const termMatch = terms.length > 1 ? terms.every(t => allText.includes(t)) : fullMatch;
+        if (fullMatch || termMatch) {
+          matches.push({ wiki: true, id: w.id, title: w.title, url: '#wiki/' + w.id, snippet: w.snippet });
+        }
+      }
+      return matches;
+    }
+
     const mockResults = [
       { title: '关于「{{query}}」的百科介绍', url: 'https://vibe-search.example/wiki/{{query}}', snippet: '这是一个模拟的搜索结果。' },
       { title: '{{query}} - 官方文档', url: 'https://docs.vibe-search.example/{{query}}', snippet: '深入了解相关主题的详细文档和教程。' },
       { title: '{{query}} 最新动态与资讯', url: 'https://news.vibe-search.example/{{query}}', snippet: '获取最新的行业资讯、技术更新。' }
     ];
 
-    function generateResults(q) { return mockResults.map(r => ({ title: r.title.replace(/\{\{query\}\}/g, q), url: r.url.replace(/\{\{query\}\}/g, encodeURIComponent(q)), snippet: r.snippet.replace(/\{\{query\}\}/g, q) })); }
+    function generateMockResults(q) { return mockResults.map(r => ({ title: r.title.replace(/\{\{query\}\}/g, q), url: r.url.replace(/\{\{query\}\}/g, encodeURIComponent(q)), snippet: r.snippet.replace(/\{\{query\}\}/g, q) })); }
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function renderResult(r) {
+      if (r.wiki) return '<div class="result-item" data-wiki data-id="' + esc(r.id) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">百科 · ' + esc(r.title) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      return '<div class="result-item"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">' + esc(r.url) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+    }
 
     function doSearch(q) {
       if (!q.trim()) return;
-      const results = generateResults(q);
+      const wikiMatches = matchWiki(q);
+      const results = wikiMatches.length > 0 ? wikiMatches : generateMockResults(q);
       searchHome.classList.add('hidden');
+      searchResults.classList.remove('hidden');
       searchResults.classList.add('show');
-      resultsHeader.textContent = '约 ' + results.length + ' 条结果 (模拟)';
-      resultsList.innerHTML = results.map(r => '<div class="result-item"><div class="result-title">' + r.title + '</div><div class="result-url">' + r.url + '</div><div class="result-snippet">' + r.snippet + '</div></div>').join('');
+      document.getElementById('wikiView').classList.remove('show');
+      resultsHeader.textContent = wikiMatches.length > 0 ? '找到 ' + results.length + ' 条百科结果' : '约 ' + results.length + ' 条结果 (模拟)';
+      resultsList.innerHTML = results.map(renderResult).join('');
+      resultsList.querySelectorAll('.result-item[data-wiki]').forEach(el => {
+        el.addEventListener('click', () => showWiki(el.getAttribute('data-id')));
+      });
     }
 
-    function showHome() { searchHome.classList.remove('hidden'); searchResults.classList.remove('show'); }
+    const wikiView = document.getElementById('wikiView');
+    const wikiArticle = document.getElementById('wikiArticle');
+    const backFromWiki = document.getElementById('backFromWiki');
+    function showWiki(id) {
+      const w = WIKI_DATA[id];
+      if (!w) return;
+      searchResults.classList.remove('show');
+      wikiView.classList.add('show');
+      searchWindow.classList.add('wiki-mode');
+      wikiArticle.innerHTML = (w.emblem || '') + w.content;
+    }
+    backFromWiki.addEventListener('click', () => {
+      wikiView.classList.remove('show');
+      searchResults.classList.add('show');
+      searchHome.classList.add('hidden');
+      searchWindow.classList.remove('wiki-mode');
+    });
+
+    function showHome() {
+      searchHome.classList.remove('hidden');
+      searchResults.classList.remove('show');
+      wikiView.classList.remove('show');
+      searchWindow.classList.remove('wiki-mode');
+      resultsList.innerHTML = '';
+    }
     backToSearch.addEventListener('click', showHome);
-    luckyBtn.addEventListener('click', () => { const q = ['人工智能','机器学习','前端开发'][Math.floor(Math.random()*3)]; searchInput.value = q; doSearch(q); });
+    luckyBtn.addEventListener('click', () => { const q = ['进步联盟','经济改革党','社区优先运动','诺兰德','议会民主'][Math.floor(Math.random()*5)]; searchInput.value = q; doSearch(q); });
     searchBtn.addEventListener('click', () => doSearch(searchInput.value));
     searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(searchInput.value); });
-    suggestionItems.forEach(item => { item.addEventListener('click', () => { searchInput.value = item.getAttribute('data-query'); doSearch(searchInput.value); }); });
 
     const chatMessages = document.getElementById('chatMessages');
     const chatWelcome = document.getElementById('chatWelcome');
