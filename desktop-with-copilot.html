@@ -119,19 +119,16 @@
     .vote-category-arrow { color: rgba(255,255,255,0.6); font-size: 14px; }
     .vote-back { margin-bottom: 16px; color: #f59e0b; cursor: pointer; font-size: 14px; display: inline-block; }
     .vote-back:hover { text-decoration: underline; }
-    .vote-section { margin-bottom: 32px; }
+    .vote-section { margin-bottom: 24px; }
     .vote-section:last-of-type { margin-bottom: 0; }
-    .vote-list { display: flex; flex-direction: column; gap: 16px; }
-    .vote-item { padding: 14px 18px; border-radius: 10px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: all 0.2s; }
-    .vote-item:hover { background: rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.5); }
-    .vote-item.selected { background: rgba(245,158,11,0.35); border-color: #f59e0b; color: #fff; }
-    .vote-item-label { color: inherit; font-size: 15px; flex: 1; }
-    .vote-item-count { color: rgba(255,255,255,0.8); font-size: 13px; }
-    .vote-section-title { font-size: 14px; color: rgba(255,255,255,0.9); margin-bottom: 12px; }
-    .vote-reason-label { font-size: 14px; color: rgba(255,255,255,0.9); margin: 16px 0 8px; }
-    .vote-reason-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.12); color: #fff; font-size: 14px; font-family: inherit; resize: vertical; min-height: 60px; max-height: 120px; box-sizing: border-box; }
-    .vote-reason-input::placeholder { color: rgba(255,255,255,0.5); }
-    .vote-reason-input:focus { outline: none; border-color: #f59e0b; background: rgba(255,255,255,0.15); }
+    .vote-section-title { font-size: 14px; color: rgba(255,255,255,0.9); margin-bottom: 16px; text-align: center; }
+    .vote-score-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .vote-score-card { padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .vote-score-name { font-size: 14px; font-weight: 600; color: #fff; text-align: center; line-height: 1.3; }
+    .vote-score-value { font-size: 28px; font-weight: 700; color: #f59e0b; min-width: 48px; text-align: center; }
+    .vote-score-slider { width: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.2); -webkit-appearance: none; appearance: none; }
+    .vote-score-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(145deg, #f59e0b, #fbbf24); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    .vote-score-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(145deg, #f59e0b, #fbbf24); cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
     .vote-confirm-btn { margin-top: 20px; margin-bottom: 16px; padding: 12px 32px; border: none; border-radius: 10px; background: linear-gradient(145deg, #d97706, #f59e0b); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: block; width: 100%; flex-shrink: 0; }
     .vote-confirm-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 4px 15px rgba(245,158,11,0.5); }
     .vote-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; color: rgba(255,255,255,0.8); }
@@ -272,15 +269,25 @@
           <div class="vote-back" id="voteBackFromParty">← 返回</div>
           <div class="vote-title">政党选举</div>
           <div class="vote-section">
-            <div class="vote-section-title">选择你要支持的政党</div>
-            <div class="vote-list" id="partyVoteList">
-              <div class="vote-item" data-party="pa">进步联盟 (PA)</div>
-              <div class="vote-item" data-party="erp">经济改革党 (ERP)</div>
-              <div class="vote-item" data-party="cfm">社区优先运动 (CFM)</div>
+            <div class="vote-section-title">为三个政党打分（0～100 分），完成后提交</div>
+            <div class="vote-score-grid" id="partyScoreGrid">
+              <div class="vote-score-card" data-party="pa">
+                <div class="vote-score-name">进步联盟<br>(PA)</div>
+                <div class="vote-score-value" id="scoreValuePa">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderPa" min="0" max="100" value="50">
+              </div>
+              <div class="vote-score-card" data-party="erp">
+                <div class="vote-score-name">经济改革党<br>(ERP)</div>
+                <div class="vote-score-value" id="scoreValueErp">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderErp" min="0" max="100" value="50">
+              </div>
+              <div class="vote-score-card" data-party="cfm">
+                <div class="vote-score-name">社区优先运动<br>(CFM)</div>
+                <div class="vote-score-value" id="scoreValueCfm">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderCfm" min="0" max="100" value="50">
+              </div>
             </div>
-            <div class="vote-reason-label">投票原因（请填写你选择该政党的理由）</div>
-            <textarea class="vote-reason-input" id="partyVoteReason" placeholder="请手动输入你的投票原因..." autocomplete="off"></textarea>
-            <button class="vote-confirm-btn" id="partyVoteConfirm" disabled>确定</button>
+            <button class="vote-confirm-btn" id="partyVoteConfirm">提交</button>
             <div class="vote-result-msg" id="partyVoteResult" style="display:none;"></div>
           </div>
         </div>
@@ -373,53 +380,48 @@
     voteBackFromParty.addEventListener('click', showVoteHome);
 
     const partyNames = { pa: '进步联盟 (PA)', erp: '经济改革党 (ERP)', cfm: '社区优先运动 (CFM)' };
-    const partyVoteList = document.getElementById('partyVoteList');
-    const partyVoteReason = document.getElementById('partyVoteReason');
     const partyVoteConfirm = document.getElementById('partyVoteConfirm');
     const partyVoteResult = document.getElementById('partyVoteResult');
-    let selectedParty = null;
+    const scoreSliders = { pa: document.getElementById('scoreSliderPa'), erp: document.getElementById('scoreSliderErp'), cfm: document.getElementById('scoreSliderCfm') };
+    const scoreValues = { pa: document.getElementById('scoreValuePa'), erp: document.getElementById('scoreValueErp'), cfm: document.getElementById('scoreValueCfm') };
     let hasVoted = false;
-    try { hasVoted = !!localStorage.getItem('norland_party_vote'); } catch (_) {}
-    function updatePartyVoteConfirmState() {
-      const reasonOk = partyVoteReason && partyVoteReason.value.trim().length > 0;
-      partyVoteConfirm.disabled = !selectedParty || !reasonOk || hasVoted;
-    }
-    partyVoteList.querySelectorAll('.vote-item').forEach(item => {
-      item.addEventListener('click', () => {
-        if (hasVoted) return;
-        selectedParty = item.getAttribute('data-party');
-        partyVoteList.querySelectorAll('.vote-item').forEach(i => i.classList.remove('selected'));
-        item.classList.add('selected');
-        updatePartyVoteConfirmState();
-      });
+    try {
+      const sv = localStorage.getItem('norland_party_vote');
+      if (sv) { const d = JSON.parse(sv); hasVoted = d && d.pa !== undefined && d.erp !== undefined && d.cfm !== undefined; }
+    } catch (_) {}
+    ['pa','erp','cfm'].forEach(id => {
+      const slider = scoreSliders[id];
+      const valueEl = scoreValues[id];
+      if (!slider || !valueEl) return;
+      slider.addEventListener('input', () => { valueEl.textContent = slider.value; });
+      if (hasVoted) { slider.disabled = true; }
     });
-    partyVoteReason.addEventListener('input', updatePartyVoteConfirmState);
     partyVoteConfirm.addEventListener('click', () => {
-      const reason = partyVoteReason ? partyVoteReason.value.trim() : '';
-      if (!selectedParty || !reason || hasVoted) return;
+      if (hasVoted) return;
+      const scores = { pa: parseInt(scoreSliders.pa.value, 10), erp: parseInt(scoreSliders.erp.value, 10), cfm: parseInt(scoreSliders.cfm.value, 10) };
       try {
-        const record = { party: selectedParty, reason: reason, time: new Date().toISOString() };
+        const record = { pa: scores.pa, erp: scores.erp, cfm: scores.cfm, time: new Date().toISOString() };
         localStorage.setItem('norland_party_vote', JSON.stringify(record));
       } catch (_) {}
       hasVoted = true;
       partyVoteConfirm.disabled = true;
-      partyVoteResult.textContent = '✓ 投票成功！你已投票给 ' + partyNames[selectedParty];
+      partyVoteResult.textContent = '✓ 投票成功！PA ' + scores.pa + ' 分 · ERP ' + scores.erp + ' 分 · CFM ' + scores.cfm + ' 分';
       partyVoteResult.style.display = 'block';
-      partyVoteList.querySelectorAll('.vote-item').forEach(i => { i.style.pointerEvents = 'none'; });
-      partyVoteReason.disabled = true;
+      ['pa','erp','cfm'].forEach(id => { scoreSliders[id].disabled = true; });
     });
     if (hasVoted) {
       try {
         const saved = localStorage.getItem('norland_party_vote');
         if (saved) {
-          const data = saved.startsWith('{') ? JSON.parse(saved) : { party: saved, reason: '' };
-          selectedParty = data.party;
-          partyVoteList.querySelector('.vote-item[data-party="' + data.party + '"]')?.classList.add('selected');
-          if (data.reason && partyVoteReason) { partyVoteReason.value = data.reason; partyVoteReason.disabled = true; }
-          partyVoteConfirm.disabled = true;
-          partyVoteResult.textContent = '你已投票给 ' + partyNames[data.party];
-          partyVoteResult.style.display = 'block';
-          partyVoteList.querySelectorAll('.vote-item').forEach(i => { i.style.pointerEvents = 'none'; });
+          const data = JSON.parse(saved);
+          if (data.pa !== undefined && data.erp !== undefined && data.cfm !== undefined) {
+            scoreSliders.pa.value = data.pa; scoreSliders.erp.value = data.erp; scoreSliders.cfm.value = data.cfm;
+            scoreValues.pa.textContent = data.pa; scoreValues.erp.textContent = data.erp; scoreValues.cfm.textContent = data.cfm;
+            scoreSliders.pa.disabled = true; scoreSliders.erp.disabled = true; scoreSliders.cfm.disabled = true;
+            partyVoteConfirm.disabled = true;
+            partyVoteResult.textContent = '你已投票：PA ' + data.pa + ' 分 · ERP ' + data.erp + ' 分 · CFM ' + data.cfm + ' 分';
+            partyVoteResult.style.display = 'block';
+          }
         }
       } catch (_) {}
     }
