@@ -24,8 +24,12 @@
     .app-window.open { display: flex; animation: windowOpen 0.3s ease; }
     .app-window.fullscreen { top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none; border-radius: 0; z-index: 101; }
     .app-window.fullscreen .chat-messages, .app-window.fullscreen .search-results { max-height: none; flex: 1; }
-.app-window.fullscreen .wiki-view { flex: 1; }
-.app-window.fullscreen .wiki-article { max-height: none; }
+    .app-window.fullscreen .wiki-view, .app-window.fullscreen .news-view { flex: 1; min-height: 0; }
+    .app-window.fullscreen .news-view iframe { min-height: none; flex: 1; height: 100%; }
+    .app-window.fullscreen .wiki-article { max-height: none; }
+    #searchWindow .window-content { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    #searchWindow .news-view.show { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #searchWindow .news-view iframe { flex: 1; min-height: 0; width: 100%; }
     .app-window.copilot-window { height: 520px; }
     @keyframes windowOpen { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
     .window-titlebar { height: 36px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
@@ -51,9 +55,6 @@
     .chat-send-btn { padding: 12px 24px; border: none; border-radius: 24px; background: linear-gradient(145deg, #7c3aed, #a78bfa); color: #fff; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
     .chat-send-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
     .chat-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .provider-select { display: flex; align-items: center; gap: 10px; padding: 8px 0; margin-bottom: 8px; }
-    .provider-select label { color: rgba(255,255,255,0.6); font-size: 13px; }
-    .provider-select select { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; font-size: 13px; cursor: pointer; }
     .chat-welcome { text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; padding: 24px; }
     .chat-welcome strong { color: rgba(255, 255, 255, 0.8); }
     .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; }
@@ -78,6 +79,10 @@
     .result-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); cursor: pointer; transition: background 0.2s; }
     .result-item:hover { background: rgba(78, 205, 196, 0.1); }
     .result-item[data-wiki] .result-title::before { content: '📖 '; }
+    .result-item[data-news] .result-title::before { content: '📰 '; }
+    .news-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .news-view.show { display: flex; }
+    .news-view iframe { flex: 1; border: none; min-height: 400px; background: #fff; }
     .result-title { color: #4ecdc4; font-size: 14px; margin-bottom: 4px; }
     .result-url { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-bottom: 4px; }
     .result-snippet { color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.4; }
@@ -89,7 +94,7 @@
     .wiki-emblem { width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
     .wiki-emblem svg { width: 100%; height: 100%; }
     .wiki-article h1 { font-size: 22px; margin: 0 0 8px 0; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-    #searchWindow.wiki-mode { height: 560px; }
+    #searchWindow.wiki-mode, #searchWindow.news-mode { height: 620px; }
     .wiki-article h2 { font-size: 16px; margin: 20px 0 10px 0; color: #4ecdc4; }
     .wiki-article p { margin: 0 0 12px 0; }
     .wiki-article ul { margin: 0 0 12px 0; padding-left: 22px; }
@@ -99,12 +104,61 @@
     .search-home { display: block; }
     .search-home.hidden { display: none; }
     .vote-app { padding: 24px 0; }
-    .vote-title { font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 20px; text-align: center; }
+    .vote-title { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 20px; text-align: center; }
+    .vote-home { display: block; }
+    .vote-home.hidden { display: none; }
+    .vote-page { display: none; flex-direction: column; flex: 1; min-height: 0; }
+    .vote-page.show { display: flex; }
+    .vote-category { padding: 16px 20px; margin-bottom: 12px; border-radius: 10px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 15px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; }
+    .vote-category:hover { background: rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.5); }
+    .vote-category.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+    .vote-category-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(245,158,11,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .vote-category-name { flex: 1; }
+    .vote-category-arrow { color: rgba(255,255,255,0.6); font-size: 14px; }
+    .vote-back { margin-bottom: 16px; color: #f59e0b; cursor: pointer; font-size: 14px; display: inline-block; }
+    .vote-back:hover { text-decoration: underline; }
+    .vote-section { margin-bottom: 32px; }
+    .vote-section:last-of-type { margin-bottom: 0; }
     .vote-list { display: flex; flex-direction: column; gap: 16px; }
-    .vote-item { padding: 14px 18px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: all 0.2s; }
-    .vote-item:hover { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
-    .vote-item-label { color: rgba(255,255,255,0.9); font-size: 15px; flex: 1; }
-    .vote-item-count { color: rgba(255,255,255,0.5); font-size: 13px; }
+    .vote-item { padding: 14px 18px; border-radius: 10px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: all 0.2s; }
+    .vote-item:hover { background: rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.5); }
+    .vote-item.selected { background: rgba(245,158,11,0.35); border-color: #f59e0b; color: #fff; }
+    .vote-item-label { color: inherit; font-size: 15px; flex: 1; }
+    .vote-item-count { color: rgba(255,255,255,0.8); font-size: 13px; }
+    .vote-section-title { font-size: 14px; color: rgba(255,255,255,0.9); margin-bottom: 12px; }
+    .vote-confirm-btn { margin-top: 20px; padding: 12px 32px; border: none; border-radius: 10px; background: linear-gradient(145deg, #d97706, #f59e0b); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: block; width: 100%; }
+    .vote-confirm-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 4px 15px rgba(245,158,11,0.5); }
+    .vote-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; color: rgba(255,255,255,0.8); }
+    .vote-result-msg { margin-top: 16px; padding: 12px 16px; border-radius: 10px; background: rgba(46,204,113,0.25); border: 1px solid rgba(46,204,113,0.4); color: #5eead4; font-size: 14px; text-align: center; }
+    .forum-icon { background: linear-gradient(145deg, #ff4500, #ff6b35); box-shadow: 0 4px 15px rgba(255,69,0,0.5); }
+    #forumWindow .window-content { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .forum-app { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .forum-list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 16px 0; -webkit-overflow-scrolling: touch; }
+    .forum-post-card { padding: 16px 20px; margin-bottom: 12px; background: rgba(255,255,255,0.06); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.2s; }
+    .forum-post-card:hover { background: rgba(255,105,53,0.12); border-color: rgba(255,105,53,0.3); }
+    .forum-post-card h3 { font-size: 15px; color: #fff; margin-bottom: 8px; line-height: 1.4; }
+    .forum-post-meta { font-size: 12px; color: rgba(255,255,255,0.5); display: flex; gap: 16px; }
+    .forum-detail { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .forum-detail.show { display: flex; }
+    .forum-detail-content { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 16px; -webkit-overflow-scrolling: touch; }
+    .forum-header { margin-bottom: 20px; }
+    .forum-detail h2 { font-size: 18px; color: #fff; margin-bottom: 12px; line-height: 1.4; }
+    .forum-detail-body { color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 24px; }
+    .forum-comment { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .forum-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+    .forum-comment-body { flex: 1; min-width: 0; }
+    .forum-comment-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+    .forum-comment-meta .author { color: #ff6b35; }
+    .forum-comment-meta .op { color: #4ecdc4; font-size: 11px; }
+    .forum-comment-text { font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.5; }
+    .forum-vote { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; color: rgba(255,255,255,0.5); }
+    .forum-vote-btn { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 2px 6px; font-size: 14px; }
+    .forum-vote-btn:hover, .forum-vote-btn.liked { color: #ff6b35; }
+    .forum-back { margin-bottom: 12px; color: #ff6b35; cursor: pointer; font-size: 13px; }
+    .forum-back:hover { text-decoration: underline; }
+    .forum-post-meta-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
+    .forum-post-upvotes { color: #ff6b35; }
+    .result-item[data-forum] .result-title::before { content: '💬 '; }
   </style>
 </head>
 <body>
@@ -112,7 +166,7 @@
     <div class="desktop-icons">
       <div class="desktop-icon" id="searchApp" title="点击打开搜索引擎">
         <div class="icon-image">🔎</div>
-        <span class="icon-label">Vibe搜索</span>
+        <span class="icon-label">G00GLE</span>
       </div>
       <div class="desktop-icon" id="copilotApp" title="点击打开 AI 助手">
         <div class="icon-image copilot-icon">✨</div>
@@ -121,6 +175,10 @@
       <div class="desktop-icon" id="voteApp" title="点击打开投票">
         <div class="icon-image vote-icon">🗳️</div>
         <span class="icon-label">投票</span>
+      </div>
+      <div class="desktop-icon" id="forumApp" title="点击打开论坛">
+        <div class="icon-image forum-icon">💬</div>
+        <span class="icon-label">诺兰德论坛</span>
       </div>
     </div>
     <div class="taskbar">
@@ -138,17 +196,17 @@
         <button class="window-btn minimize"></button>
         <button class="window-btn maximize"></button>
       </div>
-      <span class="window-title">Vibe搜索 - 模拟搜索引擎</span>
+      <span class="window-title">Search</span>
     </div>
     <div class="window-content">
       <div class="search-home" id="searchHome">
-        <div class="search-logo"><h1>Vibe Search</h1></div>
+        <div class="search-logo"><h1>G00GLE</h1></div>
         <div class="search-box-container">
           <span class="search-icon">🔍</span>
           <input type="text" class="search-input" id="searchInput" placeholder="输入关键词搜索..." autocomplete="off">
         </div>
         <div class="search-buttons">
-          <button class="search-btn" id="searchBtn">Vibe 搜索</button>
+          <button class="search-btn" id="searchBtn">Search</button>
           <button class="search-btn" id="luckyBtn">手气不错</button>
         </div>
       </div>
@@ -160,6 +218,30 @@
       <div class="wiki-view" id="wikiView">
         <div class="back-to-search" id="backFromWiki">← 返回搜索</div>
         <div class="wiki-article" id="wikiArticle"></div>
+      </div>
+      <div class="news-view" id="newsView">
+        <div class="back-to-search" id="backFromNews">← 返回搜索</div>
+        <iframe id="newsFrame" title="新闻"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-window copilot-window" id="forumWindow" style="height:580px">
+    <div class="window-titlebar">
+      <div class="window-buttons">
+        <button class="window-btn close" id="forumCloseBtn"></button>
+        <button class="window-btn minimize"></button>
+        <button class="window-btn maximize"></button>
+      </div>
+      <span class="window-title">诺兰德论坛 r/Norland</span>
+    </div>
+    <div class="window-content">
+      <div class="forum-app">
+        <div class="forum-list" id="forumList"></div>
+        <div class="forum-detail" id="forumDetail">
+          <div class="forum-back" id="forumBack">← 返回帖子列表</div>
+          <div class="forum-detail-content" id="forumDetailContent"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -175,9 +257,24 @@
     </div>
     <div class="window-content">
       <div class="vote-app">
-        <div class="vote-title">投票</div>
-        <div class="vote-list" id="voteList">
-          <!-- 在此处添加三个投票选项 -->
+        <div class="vote-home" id="voteHome">
+          <div class="vote-title">诺兰德选举投票</div>
+          <div class="vote-category" id="voteCategoryParty"><div class="vote-category-icon">🏛️</div><span class="vote-category-name">政党选举</span><span class="vote-category-arrow">→</span></div>
+          <div class="vote-category disabled" id="voteCategoryPolicy"><div class="vote-category-icon">📋</div><span class="vote-category-name">政策投票</span><span class="vote-category-arrow">敬请期待</span></div>
+        </div>
+        <div class="vote-page" id="votePartyPage">
+          <div class="vote-back" id="voteBackFromParty">← 返回</div>
+          <div class="vote-title">政党选举</div>
+          <div class="vote-section">
+            <div class="vote-section-title">选择你要支持的政党</div>
+            <div class="vote-list" id="partyVoteList">
+              <div class="vote-item" data-party="pa">进步联盟 (PA)</div>
+              <div class="vote-item" data-party="erp">经济改革党 (ERP)</div>
+              <div class="vote-item" data-party="cfm">社区优先运动 (CFM)</div>
+            </div>
+            <button class="vote-confirm-btn" id="partyVoteConfirm" disabled>确定</button>
+            <div class="vote-result-msg" id="partyVoteResult" style="display:none;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -190,23 +287,16 @@
         <button class="window-btn minimize"></button>
         <button class="window-btn maximize"></button>
       </div>
-      <span class="window-title">Copilot - AI 助手 (GPT-5.1)</span>
+      <span class="window-title">Copilot - AI 助手</span>
     </div>
     <div class="window-content">
       <div class="chat-window">
         <div class="chat-messages" id="chatMessages">
           <div class="chat-welcome" id="chatWelcome">
-            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>基于 GPT-5.1 模型，有什么可以帮你的？
+            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>有什么可以帮你的？
           </div>
         </div>
         <div class="chat-input-area">
-          <div class="provider-select">
-            <label>通道：</label>
-            <select id="providerSelect">
-              <option value="relay">学顶猫中转</option>
-              <option value="openai">直连 OpenAI</option>
-            </select>
-          </div>
           <input type="text" class="chat-input" id="chatInput" placeholder="输入你的问题..." autocomplete="off">
           <button class="chat-send-btn" id="chatSendBtn">发送</button>
         </div>
@@ -214,6 +304,7 @@
     </div>
   </div>
 
+  <script src="/resources/forum-data.js"></script>
   <script>
     const searchApp = document.getElementById('searchApp');
     const searchWindow = document.getElementById('searchWindow');
@@ -221,10 +312,13 @@
     const copilotWindow = document.getElementById('copilotWindow');
     const voteApp = document.getElementById('voteApp');
     const voteWindow = document.getElementById('voteWindow');
+    const forumApp = document.getElementById('forumApp');
+    const forumWindow = document.getElementById('forumWindow');
     const overlay = document.getElementById('overlay');
     const closeBtn = document.getElementById('closeBtn');
     const copilotCloseBtn = document.getElementById('copilotCloseBtn');
     const voteCloseBtn = document.getElementById('voteCloseBtn');
+    const forumCloseBtn = document.getElementById('forumCloseBtn');
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
 
@@ -236,7 +330,8 @@
 
     searchApp.addEventListener('click', () => { searchWindow.classList.add('open'); overlay.classList.add('show'); showHome(); searchInput.focus(); });
     copilotApp.addEventListener('click', () => { copilotWindow.classList.add('open'); overlay.classList.add('show'); document.getElementById('chatInput').focus(); });
-    voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); });
+    voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); showVoteHome(); });
+    forumApp.addEventListener('click', () => { forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); });
 
     function toggleFullscreen(win) {
       win.classList.toggle('fullscreen');
@@ -244,12 +339,69 @@
     searchWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(searchWindow); });
     copilotWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(copilotWindow); });
     voteWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(voteWindow); });
+    forumWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(forumWindow); });
 
-    function closeWindow() { searchWindow.classList.remove('open'); copilotWindow.classList.remove('open'); voteWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); copilotWindow.classList.remove('fullscreen'); voteWindow.classList.remove('fullscreen'); overlay.classList.remove('show'); }
-    closeBtn.addEventListener('click', () => { searchWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); if (!copilotWindow.classList.contains('open') && !voteWindow.classList.contains('open')) overlay.classList.remove('show'); });
-    copilotCloseBtn.addEventListener('click', () => { copilotWindow.classList.remove('open'); copilotWindow.classList.remove('fullscreen'); if (!searchWindow.classList.contains('open') && !voteWindow.classList.contains('open')) overlay.classList.remove('show'); });
-    voteCloseBtn.addEventListener('click', () => { voteWindow.classList.remove('open'); voteWindow.classList.remove('fullscreen'); if (!searchWindow.classList.contains('open') && !copilotWindow.classList.contains('open')) overlay.classList.remove('show'); });
+    function anyWindowOpen() { return searchWindow.classList.contains('open') || copilotWindow.classList.contains('open') || voteWindow.classList.contains('open') || forumWindow.classList.contains('open'); }
+    function closeWindow() { searchWindow.classList.remove('open'); copilotWindow.classList.remove('open'); voteWindow.classList.remove('open'); forumWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); copilotWindow.classList.remove('fullscreen'); voteWindow.classList.remove('fullscreen'); forumWindow.classList.remove('fullscreen'); overlay.classList.remove('show'); }
+    closeBtn.addEventListener('click', () => { searchWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
+    copilotCloseBtn.addEventListener('click', () => { copilotWindow.classList.remove('open'); copilotWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
+    voteCloseBtn.addEventListener('click', () => { voteWindow.classList.remove('open'); voteWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
+    forumCloseBtn.addEventListener('click', () => { forumWindow.classList.remove('open'); forumWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
     overlay.addEventListener('click', closeWindow);
+
+    const voteHome = document.getElementById('voteHome');
+    const votePartyPage = document.getElementById('votePartyPage');
+    const voteCategoryParty = document.getElementById('voteCategoryParty');
+    const voteBackFromParty = document.getElementById('voteBackFromParty');
+    function showVoteHome() {
+      voteHome.classList.remove('hidden');
+      votePartyPage.classList.remove('show');
+    }
+    function showVotePartyPage() {
+      voteHome.classList.add('hidden');
+      votePartyPage.classList.add('show');
+    }
+    voteCategoryParty.addEventListener('click', showVotePartyPage);
+    voteBackFromParty.addEventListener('click', showVoteHome);
+
+    const partyNames = { pa: '进步联盟 (PA)', erp: '经济改革党 (ERP)', cfm: '社区优先运动 (CFM)' };
+    const partyVoteList = document.getElementById('partyVoteList');
+    const partyVoteConfirm = document.getElementById('partyVoteConfirm');
+    const partyVoteResult = document.getElementById('partyVoteResult');
+    let selectedParty = null;
+    let hasVoted = false;
+    try { hasVoted = !!localStorage.getItem('norland_party_vote'); } catch (_) {}
+    partyVoteList.querySelectorAll('.vote-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (hasVoted) return;
+        selectedParty = item.getAttribute('data-party');
+        partyVoteList.querySelectorAll('.vote-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        partyVoteConfirm.disabled = false;
+      });
+    });
+    partyVoteConfirm.addEventListener('click', () => {
+      if (!selectedParty || hasVoted) return;
+      try { localStorage.setItem('norland_party_vote', selectedParty); } catch (_) {}
+      hasVoted = true;
+      partyVoteConfirm.disabled = true;
+      partyVoteResult.textContent = '✓ 投票成功！你已投票给 ' + partyNames[selectedParty];
+      partyVoteResult.style.display = 'block';
+      partyVoteList.querySelectorAll('.vote-item').forEach(i => { i.style.pointerEvents = 'none'; });
+    });
+    if (hasVoted) {
+      try {
+        const saved = localStorage.getItem('norland_party_vote');
+        if (saved) {
+          selectedParty = saved;
+          partyVoteList.querySelector('.vote-item[data-party="' + saved + '"]')?.classList.add('selected');
+          partyVoteConfirm.disabled = true;
+          partyVoteResult.textContent = '你已投票给 ' + partyNames[saved];
+          partyVoteResult.style.display = 'block';
+          partyVoteList.querySelectorAll('.vote-item').forEach(i => { i.style.pointerEvents = 'none'; });
+        }
+      } catch (_) {}
+    }
 
     const searchHome = document.getElementById('searchHome');
     const searchResults = document.getElementById('searchResults');
@@ -354,6 +506,48 @@
       }
     };
 
+    const NEWS_DATA = [
+      { id: 1, title: '政府通过学生债务减免计划，数十万毕业生受益', site: '诺兰德时报', url: '/news/1.html', keywords: ['学生债务', '债务减免', '毕业生', '进步联盟', 'PA', '教育', '贷款', '艾琳·卡斯特', '35万', '议会', '诺兰德时报'] },
+      { id: 2, title: '环保补贴项目被质疑存在利益冲突，进步联盟官员接受调查', site: '雷恩港日报', url: '/news/2.html', keywords: ['环保补贴', '利益冲突', '进步联盟', 'PA', '反腐', '丹尼尔·沃克', '可再生能源', '1.2亿', '雷恩港'] },
+      { id: 3, title: '诺兰德AI创新基金启动，吸引多家科技企业设立研发中心', site: '诺兰德科技报', url: '/news/3.html', keywords: ['AI', '人工智能', '创新基金', '经济改革党', 'ERP', '科技', '50亿', '亚历克斯·霍顿', '研发中心', '8000'] },
+      { id: 4, title: '房地产开发商政治捐款引发争议，ERP议员被要求解释关系', site: '阿尔维斯观察家', url: '/news/4.html', keywords: ['房地产', '政治捐款', '经济改革党', 'ERP', '理查德·科尔', '300万', '住房', '选举委员会'] },
+      { id: 5, title: '社区医疗中心计划扩大，偏远地区医疗服务得到改善', site: '北岭晨报', url: '/news/5.html', keywords: ['社区医疗', '医疗中心', '社区优先运动', 'CFM', '马丁·雷耶斯', '120个', '北岭', '基层医疗'] },
+      { id: 6, title: 'CFM党领袖履历争议引发媒体关注', site: '诺兰德今日', url: '/news/6.html', keywords: ['托马斯·格林', '履历', '社区优先运动', 'CFM', '创业', '劳拉·詹森'] }
+    ];
+
+    function matchForum(query) {
+      if (typeof FORUM_DATA === 'undefined') return [];
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const p of FORUM_DATA) {
+        const allText = [p.title, p.author, ...(p.keywords || [])].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || (p.keywords && p.keywords.some(kw => kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase())));
+        const termMatch = terms.length > 1 ? terms.some(t => allText.includes(t)) : fullMatch;
+        if (fullMatch || termMatch) {
+          matches.push({ forum: true, id: p.id, title: p.title, author: p.author, snippet: p.title + ' - ' + p.author + ' · ' + (p.comments?.length || 0) + ' 条评论' });
+        }
+      }
+      return matches;
+    }
+
+    function matchNews(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const n of NEWS_DATA) {
+        const allText = [n.title, n.site, ...n.keywords].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || n.keywords.some(kw => kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase()));
+        const termMatch = terms.length > 1 ? terms.some(t => allText.includes(t)) : fullMatch;
+        if (fullMatch || termMatch) {
+          matches.push({ news: true, id: n.id, title: n.title, site: n.site, url: n.url, snippet: n.title + ' - ' + n.site });
+        }
+      }
+      return matches;
+    }
+
     function matchWiki(query) {
       const q = query.trim().toLowerCase();
       if (!q) return [];
@@ -382,21 +576,34 @@
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function renderResult(r) {
       if (r.wiki) return '<div class="result-item" data-wiki data-id="' + esc(r.id) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">百科 · ' + esc(r.title) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.news) return '<div class="result-item" data-news data-id="' + r.id + '" data-url="' + esc(r.url) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">' + esc(r.site) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.forum) return '<div class="result-item" data-forum data-id="' + r.id + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">论坛 r/Norland</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
       return '<div class="result-item"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">' + esc(r.url) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
     }
 
     function doSearch(q) {
       if (!q.trim()) return;
       const wikiMatches = matchWiki(q);
-      const results = wikiMatches.length > 0 ? wikiMatches : generateMockResults(q);
+      const newsMatches = matchNews(q);
+      const forumMatches = matchForum(q);
+      const hasMatches = wikiMatches.length > 0 || newsMatches.length > 0 || forumMatches.length > 0;
+      const results = hasMatches ? [...newsMatches, ...forumMatches, ...wikiMatches] : generateMockResults(q);
       searchHome.classList.add('hidden');
       searchResults.classList.remove('hidden');
       searchResults.classList.add('show');
       document.getElementById('wikiView').classList.remove('show');
-      resultsHeader.textContent = wikiMatches.length > 0 ? '找到 ' + results.length + ' 条百科结果' : '约 ' + results.length + ' 条结果 (模拟)';
+      document.getElementById('newsView').classList.remove('show');
+      const label = hasMatches ? '找到 ' + results.length + ' 条结果' : '约 ' + results.length + ' 条结果 (模拟)';
+      resultsHeader.textContent = label;
       resultsList.innerHTML = results.map(renderResult).join('');
       resultsList.querySelectorAll('.result-item[data-wiki]').forEach(el => {
         el.addEventListener('click', () => showWiki(el.getAttribute('data-id')));
+      });
+      resultsList.querySelectorAll('.result-item[data-news]').forEach(el => {
+        el.addEventListener('click', () => showNews(el.getAttribute('data-url')));
+      });
+      resultsList.querySelectorAll('.result-item[data-forum]').forEach(el => {
+        el.addEventListener('click', () => { const id = parseInt(el.getAttribute('data-id'), 10); forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); showForumPost(id); });
       });
     }
 
@@ -418,15 +625,86 @@
       searchWindow.classList.remove('wiki-mode');
     });
 
+    const newsView = document.getElementById('newsView');
+    const newsFrame = document.getElementById('newsFrame');
+    const backFromNews = document.getElementById('backFromNews');
+    function showNews(url) {
+      searchResults.classList.remove('show');
+      newsView.classList.add('show');
+      searchWindow.classList.add('news-mode');
+      newsFrame.src = url;
+    }
+    backFromNews.addEventListener('click', () => {
+      newsView.classList.remove('show');
+      newsFrame.src = 'about:blank';
+      searchResults.classList.add('show');
+      searchHome.classList.add('hidden');
+      searchWindow.classList.remove('news-mode');
+    });
+
+    const forumListEl = document.getElementById('forumList');
+    const forumDetailEl = document.getElementById('forumDetail');
+    const forumDetailContent = document.getElementById('forumDetailContent');
+    const forumBackBtn = document.getElementById('forumBack');
+    const FORUM_LIKES_KEY = 'forum_comment_likes';
+    function getForumLikes() { try { const s = localStorage.getItem(FORUM_LIKES_KEY); return s ? JSON.parse(s) : {}; } catch (_) { return {}; } }
+    function setForumLikes(obj) { try { localStorage.setItem(FORUM_LIKES_KEY, JSON.stringify(obj)); } catch (_) {} }
+    function isLiked(cid) { return !!getForumLikes()[cid]; }
+    function toggleLike(cid) { const o = getForumLikes(); o[cid] = !o[cid]; setForumLikes(o); }
+    function avatarColor(author) {
+      let h = 0; for (let i = 0; i < author.length; i++) h = ((h << 5) - h) + author.charCodeAt(i) | 0;
+      const hue = Math.abs(h % 360); return 'hsl(' + hue + ', 60%, 45%)';
+    }
+    function avatarLetter(author) { return (author || '?')[0].toUpperCase(); }
+    function renderForumList() {
+      if (typeof FORUM_DATA === 'undefined') { forumListEl.innerHTML = '<p style="color:rgba(255,255,255,0.5);padding:20px;">论坛加载中...</p>'; return; }
+      const sorted = [...FORUM_DATA].sort((a, b) => (a.timeSort || 999) - (b.timeSort || 999));
+      forumListEl.innerHTML = sorted.map(p => {
+        const commentCount = (p.comments || []).length;
+        return '<div class="forum-post-card" data-id="' + p.id + '"><h3>' + esc(p.title) + '</h3><div class="forum-post-meta">' + esc(p.time) + ' · ' + commentCount + ' 条评论 · u/' + esc(p.author) + '</div></div>';
+      }).join('');
+      forumListEl.querySelectorAll('.forum-post-card').forEach(card => {
+        card.addEventListener('click', () => showForumPost(parseInt(card.getAttribute('data-id'), 10)));
+      });
+      forumListEl.style.display = 'block';
+      forumDetailEl.classList.remove('show');
+    }
+    function showForumPost(postId) {
+      if (typeof FORUM_DATA === 'undefined') return;
+      const post = FORUM_DATA.find(p => p.id === postId);
+      if (!post) return;
+      forumListEl.style.display = 'none';
+      forumDetailEl.classList.add('show');
+      const likes = getForumLikes();
+      const comments = (post.comments || []).map(c => {
+        const liked = !!likes[c.id];
+        const displayUpvotes = c.upvotes + (liked ? 1 : 0);
+        return '<div class="forum-comment" data-cid="' + esc(c.id) + '"><div class="forum-avatar" style="background:' + avatarColor(c.author) + '">' + avatarLetter(c.author) + '</div><div class="forum-comment-body"><div class="forum-comment-meta"><span class="author">u/' + esc(c.author) + '</span>' + (c.isOP ? ' <span class="op">[楼主]</span>' : '') + '</div><div class="forum-comment-text">' + esc(c.content) + '</div><div class="forum-vote"><button class="forum-vote-btn ' + (liked ? 'liked' : '') + '" data-cid="' + esc(c.id) + '" title="点赞">👍</button><span class="forum-vote-count">' + displayUpvotes + '</span></div></div></div>';
+      }).join('');
+      forumDetailContent.innerHTML = '<div class="forum-header"><div class="forum-post-meta-main"><span class="forum-avatar" style="width:24px;height:24px;font-size:11px;background:' + avatarColor(post.author) + '">' + avatarLetter(post.author) + '</span><span class="forum-post-upvotes">⬆ ' + (post.upvotes || 0) + '</span> u/' + esc(post.author) + ' · ' + esc(post.time) + '</div><h2>' + esc(post.title) + '</h2></div><div class="forum-detail-body">' + esc(post.content) + '</div><div class="forum-comments-title" style="margin:16px 0 8px;font-size:14px;color:rgba(255,255,255,0.6);">' + (post.comments || []).length + ' 条评论</div>' + comments;
+      forumDetailContent.querySelectorAll('.forum-vote-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const cid = btn.getAttribute('data-cid');
+          toggleLike(cid);
+          showForumPost(postId);
+        });
+      });
+    }
+    forumBackBtn.addEventListener('click', renderForumList);
+
     function showHome() {
       searchHome.classList.remove('hidden');
       searchResults.classList.remove('show');
       wikiView.classList.remove('show');
+      newsView.classList.remove('show');
+      newsFrame.src = 'about:blank';
       searchWindow.classList.remove('wiki-mode');
+      searchWindow.classList.remove('news-mode');
       resultsList.innerHTML = '';
     }
     backToSearch.addEventListener('click', showHome);
-    luckyBtn.addEventListener('click', () => { const q = ['进步联盟','经济改革党','社区优先运动','诺兰德','议会民主'][Math.floor(Math.random()*5)]; searchInput.value = q; doSearch(q); });
+    luckyBtn.addEventListener('click', () => { const q = ['进步联盟','经济改革党','学生债务','AI创新','社区医疗','托马斯·格林','环保补贴','房地产'][Math.floor(Math.random()*8)]; searchInput.value = q; doSearch(q); });
     searchBtn.addEventListener('click', () => doSearch(searchInput.value));
     searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(searchInput.value); });
 
@@ -434,11 +712,7 @@
     const chatWelcome = document.getElementById('chatWelcome');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
-    const providerSelect = document.getElementById('providerSelect');
     let chatHistory = [];
-
-    try { const saved = localStorage.getItem('aiProvider'); if (saved) providerSelect.value = saved; } catch (_) {}
-    providerSelect.addEventListener('change', () => { try { localStorage.setItem('aiProvider', providerSelect.value); } catch (_) {} });
 
     function addMessage(role, content) {
       chatWelcome.style.display = 'none';
@@ -472,7 +746,7 @@
       chatHistory.push({ role: 'user', content: text });
       addTypingIndicator();
       try {
-        const provider = document.getElementById('providerSelect').value;
+        const provider = 'relay';
         const res = await fetch(window.location.origin + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory, provider }) });
         const data = await res.json();
         document.getElementById('typingIndicator')?.remove();

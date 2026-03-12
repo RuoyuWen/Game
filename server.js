@@ -75,6 +75,21 @@ app.get('/', (req, res) => {
   res.sendFile(file);
 });
 
+// 新闻站点导航占位页 - 点击「新闻」「科技」等时显示
+const emptyNewsHtml = `<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>暂无其他新闻</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0}body{font-family:'Noto Sans SC',sans-serif;background:#f4f4f4;color:#333;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;padding:48px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);text-align:center;max-width:400px}
+.card h1{font-size:20px;margin-bottom:16px;color:#666}
+.card p{font-size:15px;line-height:1.6;color:#999}
+.card .tip{margin-top:24px;font-size:13px;color:#4ecdc4}</style></head>
+<body><div class="card"><h1>暂无其他新闻</h1><p>该栏目内容正在筹备中，敬请期待。</p><p class="tip">← 返回搜索可浏览已发布的诺兰德新闻</p></div></body></html>`;
+
+['/news', '/news/', '/tech', '/tech/', '/politics', '/politics/', '/investigation', '/investigation/', '/health', '/health/', '/medical', '/medical/'].forEach(p => {
+  app.get(p, (req, res) => { res.send(emptyNewsHtml); });
+});
+
 app.listen(PORT, () => {
   console.log(`\n🚀 桌面已启动: http://localhost:${PORT}`);
   console.log(`🤖 Copilot AI 助手使用模型: ${model}`);
