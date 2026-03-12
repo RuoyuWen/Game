@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="2;url=desktop-with-copilot.html">
+  <title>重置测试数据</title>
+  <style>
+    body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #1a1a2e; color: #fff; flex-direction: column; gap: 16px; }
+    .msg { font-size: 18px; }
+    .countdown { color: #4ecdc4; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="msg">✓ 已重置测试数据</div>
+  <div class="countdown">2 秒后自动返回桌面...</div>
+  <script>
+    try {
+      localStorage.removeItem('norland_party_vote');
+      localStorage.removeItem('forum_comment_likes');
+    } catch (_) {}
+  </script>
+</body>
+</html>
