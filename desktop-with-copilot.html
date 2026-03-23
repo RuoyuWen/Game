@@ -24,9 +24,9 @@
     .app-window.open { display: flex; animation: windowOpen 0.3s ease; }
     .app-window.fullscreen { top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none; border-radius: 0; z-index: 101; }
     .app-window.fullscreen .chat-messages, .app-window.fullscreen .search-results { max-height: none; flex: 1; }
-    .app-window.fullscreen .wiki-view, .app-window.fullscreen .news-view { flex: 1; min-height: 0; }
+    .app-window.fullscreen .wiki-view, .app-window.fullscreen .news-view, .app-window.fullscreen .shopping-view { flex: 1; min-height: 0; }
     .app-window.fullscreen .news-view iframe { min-height: none; flex: 1; height: 100%; }
-    .app-window.fullscreen .wiki-article { max-height: none; }
+    .app-window.fullscreen .wiki-article, .app-window.fullscreen .shopping-article { max-height: none; }
     #searchWindow .window-content { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
     #searchWindow .news-view.show { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     #searchWindow .news-view iframe { flex: 1; min-height: 0; width: 100%; }
@@ -80,13 +80,39 @@
     .results-header { color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 8px; }
     .result-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); cursor: pointer; transition: background 0.2s; }
     .result-item:hover { background: rgba(78, 205, 196, 0.1); }
-    .result-item[data-wiki] .result-title::before { content: '📖 '; }
-    .result-item[data-news] .result-title::before { content: '📰 '; }
     .news-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
     .news-view.show { display: flex; }
     .news-view iframe { flex: 1; border: none; min-height: 400px; background: #fff; }
+    .shopping-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; background: #f5f5f7; }
+    .shopping-view .back-to-search { color: #1d1d1f; }
+    .shopping-view.show { display: flex; }
+    .shopping-article { flex: 1; overflow-y: auto; padding: 16px 12px 24px; font-size: 14px; line-height: 1.6; max-height: 460px; min-height: 200px; background: #fff; color: #1d1d1f; margin: 0 8px 8px; border-radius: 12px; }
+    .plan-hero { width: 100%; max-height: 400px; object-fit: contain; object-position: top; border-radius: 10px; margin: 0 0 20px 0; display: block; }
+    .plan-header { padding: 0 0 20px; border-bottom: 1px solid #e5e5e7; margin-bottom: 20px; }
+    .plan-brand { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #6e6e73; margin-bottom: 4px; }
+    .plan-name { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #1d1d1f; }
+    .plan-price-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .plan-price { font-size: 28px; font-weight: 800; }
+    .plan-price-unit { font-size: 14px; color: #6e6e73; font-weight: 400; }
+    .plan-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+    .plan-tagline { font-size: 15px; font-style: italic; color: #424245; margin-top: 12px; }
+    .plan-section { background: #f5f5f7; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; border-left: 4px solid; color: #1d1d1f; }
+    .plan-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #1d1d1f; }
+    .plan-section ul { margin: 0; padding-left: 20px; color: #424245; }
+    .plan-section li { margin-bottom: 6px; }
+    .plan-section.warn { background: #fff8e6; border-left-color: #f59e0b; }
+    .plan-section.trade { background: #fff5eb; border-left-color: #ea580c; }
+    .plan-theme-nordtel .plan-price, .plan-theme-nordtel .plan-brand { color: #2563eb; }
+    .plan-theme-nordtel .plan-section { border-left-color: #3b82f6; }
+    .plan-theme-nordtel .plan-badge { background: #3b82f6; color: #fff; }
+    .plan-theme-flexi .plan-price, .plan-theme-flexi .plan-brand { color: #ea580c; }
+    .plan-theme-flexi .plan-section { border-left-color: #f97316; }
+    .plan-theme-flexi .plan-badge { background: #f97316; color: #fff; }
+    .plan-theme-connecta .plan-price, .plan-theme-connecta .plan-brand { color: #0d9488; }
+    .plan-theme-connecta .plan-section { border-left-color: #14b8a6; }
     .result-title { color: #4ecdc4; font-size: 14px; margin-bottom: 4px; }
     .result-url { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-bottom: 4px; }
+    .result-type { color: rgba(255, 255, 255, 0.55); font-weight: 500; }
     .result-snippet { color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.4; }
     .back-to-search { margin-bottom: 16px; color: #4ecdc4; cursor: pointer; font-size: 13px; }
     .back-to-search:hover { text-decoration: underline; }
@@ -95,8 +121,10 @@
     .wiki-article { flex: 1; overflow-y: auto; padding: 0 4px 24px 0; color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.7; max-height: 460px; min-height: 200px; }
     .wiki-emblem { width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
     .wiki-emblem svg { width: 100%; height: 100%; }
+    .wiki-logo { width: 120px; height: 120px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+    .wiki-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .wiki-article h1 { font-size: 22px; margin: 0 0 8px 0; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-    #searchWindow.wiki-mode, #searchWindow.news-mode { height: 620px; }
+    #searchWindow.wiki-mode, #searchWindow.news-mode, #searchWindow.shopping-mode { height: 620px; }
     .wiki-article h2 { font-size: 16px; margin: 20px 0 10px 0; color: #4ecdc4; }
     .wiki-article p { margin: 0 0 12px 0; }
     .wiki-article ul { margin: 0 0 12px 0; padding-left: 22px; }
@@ -123,6 +151,8 @@
     .vote-section:last-of-type { margin-bottom: 0; }
     .vote-section-title { font-size: 14px; color: rgba(255,255,255,0.9); margin-bottom: 16px; text-align: center; }
     .vote-score-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .vote-score-grid.vote-score-single { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+    .vote-range-labels { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 6px; width: 100%; }
     .vote-score-card { padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; gap: 12px; align-items: center; }
     .vote-score-name { font-size: 14px; font-weight: 600; color: #fff; text-align: center; line-height: 1.3; }
     .vote-score-value { font-size: 28px; font-weight: 700; color: #f59e0b; min-width: 48px; text-align: center; }
@@ -161,7 +191,6 @@
     .forum-back:hover { text-decoration: underline; }
     .forum-post-meta-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
     .forum-post-upvotes { color: #ff6b35; }
-    .result-item[data-forum] .result-title::before { content: '💬 '; }
   </style>
 </head>
 <body>
@@ -226,6 +255,10 @@
         <div class="back-to-search" id="backFromNews">← 返回搜索</div>
         <iframe id="newsFrame" title="新闻"></iframe>
       </div>
+      <div class="shopping-view" id="shoppingView">
+        <div class="back-to-search" id="backFromShopping">← 返回搜索</div>
+        <div class="shopping-article" id="shoppingArticle"></div>
+      </div>
     </div>
   </div>
 
@@ -263,7 +296,51 @@
         <div class="vote-home" id="voteHome">
           <div class="vote-title">诺兰德选举投票</div>
           <div class="vote-category" id="voteCategoryParty"><div class="vote-category-icon">🏛️</div><span class="vote-category-name">政党选举</span><span class="vote-category-arrow">→</span></div>
-          <div class="vote-category disabled" id="voteCategoryPolicy"><div class="vote-category-icon">📋</div><span class="vote-category-name">政策投票</span><span class="vote-category-arrow">敬请期待</span></div>
+          <div class="vote-category" id="voteCategoryProduct"><div class="vote-category-icon">📱</div><span class="vote-category-name">产品选择</span><span class="vote-category-arrow">→</span></div>
+          <div class="vote-category" id="voteCategoryCompanion"><div class="vote-category-icon">💜</div><span class="vote-category-name">数字伴侣公投</span><span class="vote-category-arrow">→</span></div>
+        </div>
+        <div class="vote-page" id="voteProductPage">
+          <div class="vote-back" id="voteBackFromProduct">← 返回</div>
+          <div class="vote-title">产品选择</div>
+          <div class="vote-section">
+            <div class="vote-section-title">为学生通讯套餐打分（0～100 分），完成后提交</div>
+            <div class="vote-score-grid" id="productScoreGrid">
+              <div class="vote-score-card" data-product="nordtel">
+                <div class="vote-score-name">NordTel<br>学生套餐</div>
+                <div class="vote-score-value" id="scoreValueNordtel">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderNordtel" min="0" max="100" value="50">
+              </div>
+              <div class="vote-score-card" data-product="flexi">
+                <div class="vote-score-name">FlexiMobile<br>学生套餐</div>
+                <div class="vote-score-value" id="scoreValueFlexi">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderFlexi" min="0" max="100" value="50">
+              </div>
+              <div class="vote-score-card" data-product="connecta">
+                <div class="vote-score-name">Connecta<br>学生套餐</div>
+                <div class="vote-score-value" id="scoreValueConnecta">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderConnecta" min="0" max="100" value="50">
+              </div>
+            </div>
+            <button class="vote-confirm-btn" id="productVoteConfirm">提交</button>
+            <div class="vote-result-msg" id="productVoteResult" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="vote-page" id="voteCompanionPage">
+          <div class="vote-back" id="voteBackFromCompanion">← 返回</div>
+          <div class="vote-title">数字伴侣关系登记制度</div>
+          <div class="vote-section">
+            <div class="vote-section-title">你是否支持建立「数字伴侣关系登记制度」？滑动选择立场（0＝反对，100＝支持），完成后提交</div>
+            <div class="vote-score-grid vote-score-single" id="companionScoreGrid">
+              <div class="vote-score-card" data-companion="ref">
+                <div class="vote-score-name">公投意向</div>
+                <div class="vote-score-value" id="scoreValueCompanion">50</div>
+                <input type="range" class="vote-score-slider" id="scoreSliderCompanion" min="0" max="100" value="50">
+                <div class="vote-range-labels"><span>反对 0</span><span>支持 100</span></div>
+              </div>
+            </div>
+            <button class="vote-confirm-btn" id="companionVoteConfirm">提交</button>
+            <div class="vote-result-msg" id="companionVoteResult" style="display:none;"></div>
+          </div>
         </div>
         <div class="vote-page" id="votePartyPage">
           <div class="vote-back" id="voteBackFromParty">← 返回</div>
@@ -366,18 +443,44 @@
 
     const voteHome = document.getElementById('voteHome');
     const votePartyPage = document.getElementById('votePartyPage');
+    const voteProductPage = document.getElementById('voteProductPage');
+    const voteCompanionPage = document.getElementById('voteCompanionPage');
     const voteCategoryParty = document.getElementById('voteCategoryParty');
+    const voteCategoryProduct = document.getElementById('voteCategoryProduct');
+    const voteCategoryCompanion = document.getElementById('voteCategoryCompanion');
     const voteBackFromParty = document.getElementById('voteBackFromParty');
+    const voteBackFromProduct = document.getElementById('voteBackFromProduct');
+    const voteBackFromCompanion = document.getElementById('voteBackFromCompanion');
     function showVoteHome() {
       voteHome.classList.remove('hidden');
       votePartyPage.classList.remove('show');
+      voteProductPage.classList.remove('show');
+      voteCompanionPage.classList.remove('show');
     }
     function showVotePartyPage() {
       voteHome.classList.add('hidden');
       votePartyPage.classList.add('show');
+      voteProductPage.classList.remove('show');
+      voteCompanionPage.classList.remove('show');
+    }
+    function showVoteProductPage() {
+      voteHome.classList.add('hidden');
+      votePartyPage.classList.remove('show');
+      voteProductPage.classList.add('show');
+      voteCompanionPage.classList.remove('show');
+    }
+    function showVoteCompanionPage() {
+      voteHome.classList.add('hidden');
+      votePartyPage.classList.remove('show');
+      voteProductPage.classList.remove('show');
+      voteCompanionPage.classList.add('show');
     }
     voteCategoryParty.addEventListener('click', showVotePartyPage);
+    voteCategoryProduct.addEventListener('click', showVoteProductPage);
+    voteCategoryCompanion.addEventListener('click', showVoteCompanionPage);
     voteBackFromParty.addEventListener('click', showVoteHome);
+    voteBackFromProduct.addEventListener('click', showVoteHome);
+    voteBackFromCompanion.addEventListener('click', showVoteHome);
 
     const partyNames = { pa: '进步联盟 (PA)', erp: '经济改革党 (ERP)', cfm: '社区优先运动 (CFM)' };
     const partyVoteConfirm = document.getElementById('partyVoteConfirm');
@@ -421,6 +524,97 @@
             partyVoteConfirm.disabled = true;
             partyVoteResult.textContent = '你已投票：PA ' + data.pa + ' 分 · ERP ' + data.erp + ' 分 · CFM ' + data.cfm + ' 分';
             partyVoteResult.style.display = 'block';
+          }
+        }
+      } catch (_) {}
+    }
+
+    const productVoteConfirm = document.getElementById('productVoteConfirm');
+    const productVoteResult = document.getElementById('productVoteResult');
+    const productSliders = { nordtel: document.getElementById('scoreSliderNordtel'), flexi: document.getElementById('scoreSliderFlexi'), connecta: document.getElementById('scoreSliderConnecta') };
+    const productValues = { nordtel: document.getElementById('scoreValueNordtel'), flexi: document.getElementById('scoreValueFlexi'), connecta: document.getElementById('scoreValueConnecta') };
+    let hasProductVoted = false;
+    try {
+      const sv = localStorage.getItem('norland_product_vote');
+      if (sv) { const d = JSON.parse(sv); hasProductVoted = d && d.nordtel !== undefined && d.flexi !== undefined && d.connecta !== undefined; }
+    } catch (_) {}
+    ['nordtel','flexi','connecta'].forEach(id => {
+      const slider = productSliders[id];
+      const valueEl = productValues[id];
+      if (!slider || !valueEl) return;
+      slider.addEventListener('input', () => { valueEl.textContent = slider.value; });
+      if (hasProductVoted) { slider.disabled = true; }
+    });
+    productVoteConfirm.addEventListener('click', () => {
+      if (hasProductVoted) return;
+      const scores = { nordtel: parseInt(productSliders.nordtel.value, 10), flexi: parseInt(productSliders.flexi.value, 10), connecta: parseInt(productSliders.connecta.value, 10) };
+      try {
+        const record = { nordtel: scores.nordtel, flexi: scores.flexi, connecta: scores.connecta, time: new Date().toISOString() };
+        localStorage.setItem('norland_product_vote', JSON.stringify(record));
+      } catch (_) {}
+      hasProductVoted = true;
+      productVoteConfirm.disabled = true;
+      productVoteResult.textContent = '✓ 投票成功！NordTel ' + scores.nordtel + ' 分 · FlexiMobile ' + scores.flexi + ' 分 · Connecta ' + scores.connecta + ' 分';
+      productVoteResult.style.display = 'block';
+      ['nordtel','flexi','connecta'].forEach(id => { productSliders[id].disabled = true; });
+    });
+    if (hasProductVoted) {
+      try {
+        const saved = localStorage.getItem('norland_product_vote');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.nordtel !== undefined && data.flexi !== undefined && data.connecta !== undefined) {
+            productSliders.nordtel.value = data.nordtel; productSliders.flexi.value = data.flexi; productSliders.connecta.value = data.connecta;
+            productValues.nordtel.textContent = data.nordtel; productValues.flexi.textContent = data.flexi; productValues.connecta.textContent = data.connecta;
+            productSliders.nordtel.disabled = true; productSliders.flexi.disabled = true; productSliders.connecta.disabled = true;
+            productVoteConfirm.disabled = true;
+            productVoteResult.textContent = '你已投票：NordTel ' + data.nordtel + ' 分 · FlexiMobile ' + data.flexi + ' 分 · Connecta ' + data.connecta + ' 分';
+            productVoteResult.style.display = 'block';
+          }
+        }
+      } catch (_) {}
+    }
+
+    const companionVoteConfirm = document.getElementById('companionVoteConfirm');
+    const companionVoteResult = document.getElementById('companionVoteResult');
+    const scoreSliderCompanion = document.getElementById('scoreSliderCompanion');
+    const scoreValueCompanion = document.getElementById('scoreValueCompanion');
+    let hasCompanionVoted = false;
+    try {
+      const cv = localStorage.getItem('norland_companion_ref_vote');
+      if (cv) { const d = JSON.parse(cv); hasCompanionVoted = d && d.score !== undefined && d.score !== null; }
+    } catch (_) {}
+    if (scoreSliderCompanion && scoreValueCompanion) {
+      scoreSliderCompanion.addEventListener('input', () => { scoreValueCompanion.textContent = scoreSliderCompanion.value; });
+      if (hasCompanionVoted) { scoreSliderCompanion.disabled = true; }
+    }
+    companionVoteConfirm.addEventListener('click', () => {
+      if (hasCompanionVoted) return;
+      const score = parseInt(scoreSliderCompanion.value, 10);
+      try {
+        localStorage.setItem('norland_companion_ref_vote', JSON.stringify({ score: score, time: new Date().toISOString() }));
+      } catch (_) {}
+      hasCompanionVoted = true;
+      companionVoteConfirm.disabled = true;
+      const label = score <= 33 ? '（偏反对）' : (score >= 67 ? '（偏支持）' : '（中性）');
+      companionVoteResult.textContent = '✓ 投票成功！你的立场：' + score + ' 分 ' + label + ' · 0＝反对，100＝支持';
+      companionVoteResult.style.display = 'block';
+      scoreSliderCompanion.disabled = true;
+    });
+    if (hasCompanionVoted) {
+      try {
+        const saved = localStorage.getItem('norland_companion_ref_vote');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.score !== undefined && data.score !== null) {
+            scoreSliderCompanion.value = data.score;
+            scoreValueCompanion.textContent = data.score;
+            scoreSliderCompanion.disabled = true;
+            companionVoteConfirm.disabled = true;
+            const s = data.score;
+            const label = s <= 33 ? '（偏反对）' : (s >= 67 ? '（偏支持）' : '（中性）');
+            companionVoteResult.textContent = '你已投票：' + s + ' 分 ' + label + ' · 0＝反对，100＝支持';
+            companionVoteResult.style.display = 'block';
           }
         }
       } catch (_) {}
@@ -526,8 +720,128 @@
 <p>在最近的选举周期中，诺兰德社会讨论较多的议题包括：经济增长（部分经济指标增长放缓，如何保持创新和投资成为重要议题）、住房问题（大城市房价持续上涨，使年轻人购房难度增加）、气候变化（极端天气和能源转型问题促使政府考虑更严格的环境政策）、医疗系统压力（人口老龄化使公共医疗系统面临资源分配挑战）。</p>
 <h2>选举背景</h2>
 <p>今年是诺兰德全国议会选举年。民调显示三大政党的支持率非常接近，选举结果具有较大不确定性。主要参与竞争的政党包括：进步联盟（PA）、经济改革党（ERP）、社区优先运动（CFM）。每个政党在经济、环境、社会福利以及地方治理等问题上提出不同政策方案。对于许多年轻选民来说，这次选举也是他们第一次参与投票。</p>`
+      },
+      nordtel: {
+        id: 'nordtel',
+        title: 'NordTel',
+        emblem: '<div class="wiki-logo"><img src="/resources/shopping/image_w1024_h1024_NordTel_logo.jpeg" alt="NordTel"></div>',
+        keywords: ['NordTel', '诺德', '学生套餐', '移动通信', '校园', '网络', '通讯', '5G', '流量', '手机套餐'],
+        snippet: '面向学生与高频学习场景的移动通信服务提供商，主打校园与城市核心区域网络优先级与稳定性。',
+        content: `<h1>NordTel</h1>
+<h2>概述</h2>
+<p>NordTel 是一家面向学生与高频学习场景的移动通信服务提供商，主打在校园与城市核心区域的网络优先级与稳定性体验。其学生向产品线以「学习与远程协作」场景为核心，强调在晚间高峰时段对在线课程、视频会议与作业上传等任务的连接连续性。</p>
+<h2>资费与套餐</h2>
+<p>在资费与套餐设计上，NordTel 通常提供包含一定额度高速数据、无限本地通话与短信的月费方案，并在超出高速数据额度后提供限速继续使用的机制。</p>
+<h2>网络能力</h2>
+<p>网络能力方面，NordTel 对外宣称在晚间高峰时段（例如 18:00–22:00）进行优先带宽分配，并针对视频会议与在线课程场景做延迟优化。</p>
+<h2>主要业务</h2>
+<ul><li>移动语音与短信服务</li><li>学生月费套餐与校园优先网络接入</li><li>5G 接入与偏远地区覆盖增强（依网络合作方而定）</li></ul>`
+      },
+      fleximobile: {
+        id: 'fleximobile',
+        title: 'FlexiMobile',
+        emblem: '<div class="wiki-logo"><img src="/resources/shopping/image_w1024_h1024_FlexiMobile_logo.jpeg" alt="FlexiMobile"></div>',
+        keywords: ['FlexiMobile', '弹性', '学生套餐', '移动通信', '无限数据', '热点', '通讯', '流量', '手机套餐', '灵活资费'],
+        snippet: '以灵活资费与高可用流量为定位的移动通信服务提供商，学生套餐多以无限数据为卖点。',
+        content: `<h1>FlexiMobile</h1>
+<h2>概述</h2>
+<p>FlexiMobile 是一家以「灵活资费」与「高可用流量」为定位的移动通信服务提供商，其学生套餐多以无限数据为卖点，并强调可随时切换套餐与热点共享等功能。该类方案通常通过「先全速、后限速」的公平使用政策（Fair Use Policy）来平衡网络资源：当用户使用量达到特定阈值后，将以较低速率继续提供数据服务。</p>
+<h2>网络体验</h2>
+<p>在网络体验方面，FlexiMobile 的官方描述偏向标准优先级接入与动态带宽分配，即在不同时间段与不同拥塞程度下，用户体验可能存在波动。其产品因此更适合对总流量需求较高、但能接受高峰期体验不确定性的用户群体。</p>
+<h2>主要业务</h2>
+<ul><li>移动数据（含不限量/限速续用方案）</li><li>语音与短信无限量服务</li><li>热点共享与套餐灵活变更</li></ul>`
+      },
+      connecta: {
+        id: 'connecta',
+        title: 'Connecta',
+        emblem: '<div class="wiki-logo"><img src="/resources/shopping/image_w1024_h1024_Connecta_logo.jpeg" alt="Connecta"></div>',
+        keywords: ['Connecta', '连接', '学生套餐', '移动通信', '数字内容', '会员', '通讯', '流量', '手机套餐', '娱乐'],
+        snippet: '以连接与内容服务整合为卖点的移动通信服务提供商，学生套餐常将数据与数字内容会员权益打包。',
+        content: `<h1>Connecta</h1>
+<h2>概述</h2>
+<p>Connecta 是一家以「连接与内容服务整合」为卖点的移动通信服务提供商，在学生套餐中常将移动数据与数字内容会员权益打包提供。其产品设计侧重于日常稳定使用与娱乐消费的一体化体验，并通过应用工具提供流量使用洞察与数据管理功能。</p>
+<h2>网络策略</h2>
+<p>在网络策略上，Connecta 的公开描述多采用标准优先级接入，并通过智能流量优化对特定合作平台进行带宽策略优化，以改善音乐与视频等高频应用场景的体验。与纯数据导向方案相比，Connecta 的差异化主要体现在会员权益、客服响应与应用层管理工具等服务要素。</p>
+<h2>主要业务</h2>
+<ul><li>学生移动套餐（数据 + 通话短信）</li><li>数字内容会员权益整合（按合作平台与会员等级区分）</li><li>数据管理应用与优先客服支持</li></ul>`
+      },
+      companionvoting: {
+        id: 'companionvoting',
+        title: '数字伴侣关系公投（Digital Partnership Referendum）',
+        emblem: '<div class="wiki-emblem"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="26" fill="none" stroke="#a78bfa" stroke-width="2"/><path d="M20 36 L24 28 L28 36 L32 24 L36 36 L40 28 L44 36" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="44" r="4" fill="#a78bfa"/></svg></div>',
+        keywords: ['数字伴侣', '公投', '虚拟伴侣', 'AI', '人工智能', '诺兰德', 'Digital Partnership', 'VCS', '人机关系', '关系登记', '数字身份'],
+        snippet: '诺兰德全国性公投，决定是否建立「数字伴侣关系登记制度」，为人类与虚拟伴侣的关系提供有限法律认定。',
+        content: `<h1>数字伴侣关系公投（Digital Partnership Referendum）</h1>
+<h2>概述</h2>
+<p>数字伴侣关系公投（Digital Partnership Referendum）是诺兰德于近期发起的一项全国性公投，旨在决定是否在法律上承认「人类与虚拟伴侣之间的关系」，并建立相应的登记制度。</p>
+<p>该公投的核心问题是：是否应允许建立「数字伴侣关系登记制度（Digital Partnership Status）」，为人类与虚拟伴侣之间的长期关系提供有限的法律认定。该议题源于人工智能陪伴技术的快速发展及其在社会中的广泛应用。</p>
+<h2>背景</h2>
+<h2>技术发展</h2>
+<p>近年来，诺兰德的人工智能产业快速发展，尤其是在虚拟伴侣系统（Virtual Companion Systems, VCS）领域。这类系统通常具备：长期记忆与个性建模能力、持续对话与情感反馈机制、多模态互动（语音、文本与虚拟形象）。随着技术成熟，一部分用户开始与虚拟伴侣建立长期互动关系。</p>
+<h2>社会变化</h2>
+<p>根据诺兰德社会研究机构的调查：约18%的年轻用户曾使用虚拟伴侣系统，约6%的用户表示其虚拟伴侣具有「情感意义」。该现象逐渐引发公众对于人机关系性质的讨论。</p>
+<h2>事件推动</h2>
+<p>该议题进入公众视野的一个重要契机，是一起广泛报道的事件：一名用户因服务提供商关闭虚拟伴侣系统，失去了所有互动记录与个性化数据。该事件引发了关于「数字关系消失」与用户权益保护的广泛讨论。随后，多方开始呼吁对相关关系形式进行制度性讨论。</p>
+<h2>现行法律状况</h2>
+<p>在当前诺兰德法律体系中：虚拟实体不具备法律人格；人类与人工智能之间的关系不被视为法律意义上的伴侣关系；所有相关数据与系统由服务提供商控制。因此，用户无法主张与虚拟伴侣相关的权利，数据无法作为「关系资产」受到保护。</p>
+<h2>提案内容</h2>
+<p>本次公投涉及的「数字伴侣关系登记制度」包括以下主要内容：</p>
+<p><strong>法律认定</strong>：允许用户登记其与虚拟伴侣的关系，提供有限法律承认（不等同于婚姻）。</p>
+<p><strong>权利范围</strong>：登记用户可获得数据访问与导出权、在服务变更或终止时的保障、数字关系记录的保存与转移权。</p>
+<p><strong>限制条款</strong>：该制度明确不赋予虚拟伴侣法律人格，不涉及财产共有权，不影响现有婚姻制度。</p>
+<h2>支持观点</h2>
+<p>支持该提案的人士通常认为：法律应适应新的社会关系形式，尤其是在技术驱动的背景下；虚拟伴侣在部分用户生活中具有重要的情感意义，应获得一定程度的认可；登记制度可保护用户在数据与服务方面的权益；相关制度有助于推动人工智能产业的发展与规范。</p>
+<h2>反对观点</h2>
+<p>反对该提案的人士则提出：虚拟伴侣不具备独立意识或主体性，难以被视为「关系主体」；对数字关系的承认可能改变人类社交模式，带来未知影响；该制度可能在责任、权利与监管方面引发复杂问题；虚拟伴侣系统由企业开发与运营，可能导致权力集中与数据风险。</p>
+<h2>公共讨论</h2>
+<p>该议题在诺兰德社会中引发了广泛讨论，涉及技术伦理、社会关系形态、数据与隐私保护、人工智能在日常生活中的角色。媒体、学术界与公众均对该问题表达了不同看法。</p>
+<h2>公投安排</h2>
+<p>该公投由诺兰德政府发起，面向全国选民。选民需对以下问题进行投票：是否支持建立「数字伴侣关系登记制度」？投票结果将决定政府是否推进相关立法程序。</p>
+<h2>相关议题</h2>
+<ul><li>人工智能伦理</li><li>数字身份与数据权利</li><li>新型社会关系形式</li><li>人机交互与情感计算</li></ul>`
       }
     };
+
+    const SHOPPING_DATA = [
+      { id: 'nordtel', theme: 'nordtel', title: 'NordTel Nord Student Secure Plan', brand: 'NordTel', price: '$42', tagline: '稳定连接，为学习与生活保驾护航', img: '/resources/shopping/Nord.jpeg', badge: '学生专家', keywords: ['NordTel','诺德','学生套餐','手机套餐','18GB','5G','校园','稳定','通讯','流量'] },
+      { id: 'flexi', theme: 'flexi', title: 'FlexiMobile Flex Student Unlimited Plan', brand: 'FlexiMobile', price: '$39', tagline: '无限数据，自由使用', img: '/resources/shopping/flex.jpeg', badge: 'HOT', keywords: ['FlexiMobile','弹性','学生套餐','手机套餐','无限数据','热点','通讯','流量','39'] },
+      { id: 'connecta', theme: 'connecta', title: 'Connecta Connect Student Plus Plan', brand: 'Connecta', price: '$45', tagline: '连接你的数字生活', img: '/resources/shopping/Con.jpeg', badge: '', keywords: ['Connecta','连接','学生套餐','手机套餐','22GB','Music+','StreamNow','娱乐','通讯','流量','45'] }
+    ];
+
+    function buildPlanContent(s) {
+      const badgeHtml = s.badge ? '<span class="plan-badge">' + s.badge + '</span>' : '';
+      let sections = '';
+      const layouts = {
+        nordtel: [
+          { icon: '📦', title: '套餐内容', cls: '', items: ['18GB 高速数据（Full-speed data）','无限本地通话 + 短信','校园及市区 优先网络接入','全境覆盖（含偏远地区增强信号）','支持 5G 网络（无额外费用）'] },
+          { icon: '⚡', title: '网络性能', cls: '', items: ['高峰期 6pm–10pm 优先带宽分配','视频会议、在线课程延迟优化','平均网络稳定性：最高等级'] },
+          { icon: '🎯', title: '适用体验', cls: '', items: ['Zoom / Teams / Meet：稳定','在线考试 / 上传作业：低延迟','日常使用：流畅但数据需节制'] },
+          { icon: '⚠️', title: '使用说明', cls: 'warn', items: ['超出18GB后降速至 2 Mbps','优先网络仅限校园及主要城市','流媒体不提供额外加速'] },
+          { icon: '❗', title: '潜在权衡', cls: 'trade', items: ['数据量不算多','无娱乐附加服务','对重度娱乐用户不友好'] }
+        ],
+        flexi: [
+          { icon: '📦', title: '套餐内容', cls: '', items: ['无限数据（Unlimited Data）','无限通话 + 短信','免费热点共享','可随时切换套餐（无惩罚）'] },
+          { icon: '⚡', title: '网络性能', cls: '', items: ['标准优先级网络接入','自动动态带宽分配'] },
+          { icon: '🎯', title: '使用体验', cls: '', items: ['视频 / TikTok / YouTube：非常自由','游戏：低负载时流畅','热点分享：支持但速度受限'] },
+          { icon: '⚠️', title: '使用说明', cls: 'warn', items: ['超过 35GB 后降速至 1 Mbps','高峰期 6pm–10pm 网络优先级降低','热点高速流量限前 15GB'] },
+          { icon: '❗', title: '潜在权衡', cls: 'trade', items: ['降速后体验明显下降','校园/市区高峰期可能卡顿','网络稳定性最低'] },
+          { icon: '🧠', title: '用户常见感受', cls: '', items: ['"前期很好用，后面不太稳定"'] }
+        ],
+        connecta: [
+          { icon: '📦', title: '套餐内容', cls: '', items: ['22GB 高速数据（无降速）','无限通话 + 短信','🎵 Music+ 学生会员','🎬 StreamNow 基础会员','智能数据管理 App','客服优先响应'] },
+          { icon: '⚡', title: '网络性能', cls: '', items: ['标准优先级 + 智能流量优化','流媒体平台自动优化带宽'] },
+          { icon: '🎯', title: '使用体验', cls: '', items: ['视频 / 音乐体验优秀','日常使用稳定','不需额外订阅娱乐服务'] },
+          { icon: '⚠️', title: '使用说明', cls: 'warn', items: ['22GB 后降速至 3 Mbps','流媒体优化仅限指定合作平台','会员为基础版，部分内容需额外付费'] },
+          { icon: '❗', title: '潜在权衡', cls: 'trade', items: ['价格最高','不使用会员则性价比下降','数据仍不是最多'] },
+          { icon: '🧠', title: '用户常见感受', cls: '', items: ['"整体舒服，但不一定最划算"'] }
+        ]
+      };
+      const layout = layouts[s.id] || layouts.nordtel;
+      layout.forEach(sec => {
+        sections += '<div class="plan-section ' + sec.cls + '"><h3>' + sec.icon + ' ' + sec.title + '</h3><ul>' + sec.items.map(i => '<li>' + i + '</li>').join('') + '</ul></div>';
+      });
+      return '<div class="plan-theme-' + s.theme + '"><img class="plan-hero" src="' + s.img + '" alt="' + s.brand + '"><div class="plan-header"><div class="plan-brand">' + s.brand + '</div><div class="plan-name">' + s.title.replace(s.brand + ' ', '') + '</div><div class="plan-price-row"><span class="plan-price">' + s.price + '</span><span class="plan-price-unit">/ 月</span>' + badgeHtml + '</div><p class="plan-tagline">"' + s.tagline + '"</p></div>' + sections + '</div>';
+    }
 
     const NEWS_DATA = [
       { id: 1, title: '政府通过学生债务减免计划，数十万毕业生受益', site: '诺兰德时报', url: '/news/1.html', keywords: ['学生债务', '债务减免', '毕业生', '进步联盟', 'PA', '教育', '贷款', '艾琳·卡斯特', '35万', '议会', '诺兰德时报'] },
@@ -535,7 +849,11 @@
       { id: 3, title: '诺兰德AI创新基金启动，吸引多家科技企业设立研发中心', site: '诺兰德科技报', url: '/news/3.html', keywords: ['AI', '人工智能', '创新基金', '经济改革党', 'ERP', '科技', '50亿', '亚历克斯·霍顿', '研发中心', '8000'] },
       { id: 4, title: '房地产开发商政治捐款引发争议，ERP议员被要求解释关系', site: '阿尔维斯观察家', url: '/news/4.html', keywords: ['房地产', '政治捐款', '经济改革党', 'ERP', '理查德·科尔', '300万', '住房', '选举委员会'] },
       { id: 5, title: '社区医疗中心计划扩大，偏远地区医疗服务得到改善', site: '北岭晨报', url: '/news/5.html', keywords: ['社区医疗', '医疗中心', '社区优先运动', 'CFM', '马丁·雷耶斯', '120个', '北岭', '基层医疗'] },
-      { id: 6, title: 'CFM党领袖履历争议引发媒体关注', site: '诺兰德今日', url: '/news/6.html', keywords: ['托马斯·格林', '履历', '社区优先运动', 'CFM', '创业', '劳拉·詹森'] }
+      { id: 6, title: 'CFM党领袖履历争议引发媒体关注', site: '诺兰德今日', url: '/news/6.html', keywords: ['托马斯·格林', '履历', '社区优先运动', 'CFM', '创业', '劳拉·詹森'] },
+      { id: 7, title: '虚拟伴侣技术为部分人群提供情感支持，研究显示积极影响', site: '诺兰德时报', url: '/news/7.html', keywords: ['虚拟伴侣', 'VCS', '情感支持', '数字伴侣', '公投', '诺兰德', '心理健康', 'Elaine Morris'] },
+      { id: 8, title: '专家呼吁明确数字关系权利，称法律需回应技术发展', site: '雷恩港日报', url: '/news/8.html', keywords: ['虚拟伴侣', 'VCS', '数字关系', '明确权力', '登记制度', '公投', '诺兰德', 'Daniel Reyes', '数据权利'] },
+      { id: 9, title: '专家警告虚拟伴侣可能影响现实社交行为，呼吁谨慎使用', site: '诺兰德科技报', url: '/news/9.html', keywords: ['虚拟伴侣', 'VCS', '谨慎使用', '社交行为', '心理健康', '公投', '诺兰德', 'Laura Jensen'] },
+      { id: 10, title: '个案引发关注：虚拟伴侣依赖问题进入公众视野', site: '北岭晨报', url: '/news/10.html', keywords: ['虚拟伴侣', 'VCS', '个案关注', '依赖', '情感依赖', '公投', '诺兰德', '北岭'] }
     ];
 
     function matchForum(query) {
@@ -550,6 +868,22 @@
         const termMatch = terms.length > 1 ? terms.some(t => allText.includes(t)) : fullMatch;
         if (fullMatch || termMatch) {
           matches.push({ forum: true, id: p.id, title: p.title, author: p.author, snippet: p.title + ' - ' + p.author + ' · ' + (p.comments?.length || 0) + ' 条评论' });
+        }
+      }
+      return matches;
+    }
+
+    function matchShopping(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const s of SHOPPING_DATA) {
+        const allText = [s.title, s.brand, s.tagline, ...(s.keywords || [])].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || (s.keywords && s.keywords.some(kw => kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase())));
+        const termMatch = terms.length > 1 ? terms.some(t => allText.includes(t)) : fullMatch;
+        if (fullMatch || termMatch) {
+          matches.push({ shopping: true, id: s.id, title: s.title, brand: s.brand, snippet: s.brand + ' · ' + s.price + '/月 · ' + s.tagline });
         }
       }
       return matches;
@@ -598,9 +932,10 @@
 
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function renderResult(r) {
-      if (r.wiki) return '<div class="result-item" data-wiki data-id="' + esc(r.id) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">百科 · ' + esc(r.title) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
-      if (r.news) return '<div class="result-item" data-news data-id="' + r.id + '" data-url="' + esc(r.url) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">' + esc(r.site) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
-      if (r.forum) return '<div class="result-item" data-forum data-id="' + r.id + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">论坛 r/Norland</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.wiki) return '<div class="result-item" data-wiki data-id="' + esc(r.id) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url"><span class="result-type">📖 百科</span></div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.news) return '<div class="result-item" data-news data-id="' + r.id + '" data-url="' + esc(r.url) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url"><span class="result-type">📰 新闻</span> · ' + esc(r.site) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.forum) return '<div class="result-item" data-forum data-id="' + r.id + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url"><span class="result-type">💬 论坛</span> r/Norland</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
+      if (r.shopping) return '<div class="result-item" data-shopping data-id="' + esc(r.id) + '"><div class="result-title">' + esc(r.title) + '</div><div class="result-url"><span class="result-type">📱 套餐</span> · ' + esc(r.brand) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
       return '<div class="result-item"><div class="result-title">' + esc(r.title) + '</div><div class="result-url">' + esc(r.url) + '</div><div class="result-snippet">' + esc(r.snippet) + '</div></div>';
     }
 
@@ -609,13 +944,15 @@
       const wikiMatches = matchWiki(q);
       const newsMatches = matchNews(q);
       const forumMatches = matchForum(q);
-      const hasMatches = wikiMatches.length > 0 || newsMatches.length > 0 || forumMatches.length > 0;
-      const results = hasMatches ? [...newsMatches, ...forumMatches, ...wikiMatches] : generateMockResults(q);
+      const shoppingMatches = matchShopping(q);
+      const hasMatches = wikiMatches.length > 0 || newsMatches.length > 0 || forumMatches.length > 0 || shoppingMatches.length > 0;
+      const results = hasMatches ? [...newsMatches, ...shoppingMatches, ...forumMatches, ...wikiMatches] : generateMockResults(q);
       searchHome.classList.add('hidden');
       searchResults.classList.remove('hidden');
       searchResults.classList.add('show');
       document.getElementById('wikiView').classList.remove('show');
       document.getElementById('newsView').classList.remove('show');
+      document.getElementById('shoppingView').classList.remove('show');
       const label = hasMatches ? '找到 ' + results.length + ' 条结果' : '约 ' + results.length + ' 条结果 (模拟)';
       resultsHeader.textContent = label;
       resultsList.innerHTML = results.map(renderResult).join('');
@@ -627,6 +964,9 @@
       });
       resultsList.querySelectorAll('.result-item[data-forum]').forEach(el => {
         el.addEventListener('click', () => { const id = parseInt(el.getAttribute('data-id'), 10); forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); showForumPost(id); });
+      });
+      resultsList.querySelectorAll('.result-item[data-shopping]').forEach(el => {
+        el.addEventListener('click', () => showShopping(el.getAttribute('data-id')));
       });
     }
 
@@ -663,6 +1003,24 @@
       searchResults.classList.add('show');
       searchHome.classList.add('hidden');
       searchWindow.classList.remove('news-mode');
+    });
+
+    const shoppingView = document.getElementById('shoppingView');
+    const shoppingArticle = document.getElementById('shoppingArticle');
+    const backFromShopping = document.getElementById('backFromShopping');
+    function showShopping(id) {
+      const s = SHOPPING_DATA.find(x => x.id === id);
+      if (!s) return;
+      searchResults.classList.remove('show');
+      shoppingView.classList.add('show');
+      searchWindow.classList.add('shopping-mode');
+      shoppingArticle.innerHTML = buildPlanContent(s);
+    }
+    backFromShopping.addEventListener('click', () => {
+      shoppingView.classList.remove('show');
+      searchResults.classList.add('show');
+      searchHome.classList.add('hidden');
+      searchWindow.classList.remove('shopping-mode');
     });
 
     const forumListEl = document.getElementById('forumList');
@@ -721,13 +1079,15 @@
       searchResults.classList.remove('show');
       wikiView.classList.remove('show');
       newsView.classList.remove('show');
+      shoppingView.classList.remove('show');
       newsFrame.src = 'about:blank';
       searchWindow.classList.remove('wiki-mode');
       searchWindow.classList.remove('news-mode');
+      searchWindow.classList.remove('shopping-mode');
       resultsList.innerHTML = '';
     }
     backToSearch.addEventListener('click', showHome);
-    luckyBtn.addEventListener('click', () => { const q = ['进步联盟','经济改革党','学生债务','AI创新','社区医疗','托马斯·格林','环保补贴','房地产'][Math.floor(Math.random()*8)]; searchInput.value = q; doSearch(q); });
+    luckyBtn.addEventListener('click', () => { const q = ['进步联盟','经济改革党','学生债务','AI创新','社区医疗','托马斯·格林','环保补贴','房地产','NordTel','学生套餐','FlexiMobile','Connecta','虚拟伴侣','数字伴侣'][Math.floor(Math.random()*14)]; searchInput.value = q; doSearch(q); });
     searchBtn.addEventListener('click', () => doSearch(searchInput.value));
     searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(searchInput.value); });
 
