@@ -231,13 +231,15 @@ function buildReferences(sel) {
 
 function buildContextText(sel, opts) {
   const maxTotal = (opts && opts.maxTotal) || MAX_TOTAL_CONTEXT;
+  const maxWikiStrip = (opts && opts.maxWikiStrip) || MAX_WIKI_STRIP;
+  const maxForumBody = (opts && opts.maxForumBody) || MAX_FORUM_BODY;
   const parts = [];
   let total = 0;
 
   for (const id of sel.wiki) {
     const w = WIKI_DATA[id];
     if (!w) continue;
-    const body = truncate(stripHtml(w.content || ''), MAX_WIKI_STRIP);
+    const body = truncate(stripHtml(w.content || ''), maxWikiStrip);
     const block = `【百科 ${id}】${w.title}\n${w.snippet}\n\n${body}`;
     if (total + block.length > maxTotal) break;
     parts.push(block);
@@ -256,7 +258,7 @@ function buildContextText(sel, opts) {
   for (const id of sel.forum) {
     const p = FORUM_DATA.find((x) => x.id === id);
     if (!p) continue;
-    const body = truncate(String(p.content || ''), MAX_FORUM_BODY);
+    const body = truncate(String(p.content || ''), maxForumBody);
     const block = `【论坛 ${id}】u/${p.author} — ${p.title}\n${body}`;
     if (total + block.length > maxTotal) break;
     parts.push(block);
@@ -272,31 +274,29 @@ async function getCopilotSystemMessage(messages, model) {
   const query = users.map((m) => String(m.content || '')).join('\n').slice(0, 1200).trim() || '诺兰德';
 
   const sel = await resolveSelection(query, null, model);
-  const ctx = buildContextText(sel, { maxTotal: 14000 });
-  const refs = buildReferences(sel);
+  const ctx = buildContextText(sel, {
+    maxTotal: 5200,
+    maxWikiStrip: 1100,
+    maxForumBody: 420,
+  });
 
-  const base =
-    '你是模拟桌面中的「Copilot」助手，帮助用户理解虚构国家「诺兰德（Norland）」及站内新闻、百科与论坛设定。请用简洁清晰的中文回答。';
+  const style =
+    '【交互风格】像 ChatGPT / Microsoft Copilot 一样对话：自然、口语化、偏短。默认 **2～6 句话**，总字数约 **120～320 字**；除非用户明确说「详细」「展开」「多讲一点」再写长。不要用「一、二、三」长清单或小标题堆砌；不要复述资料全文。只答与问题最相关的要点。\n' +
+    '【事实】下列摘录仅供核对；回答里不必写「根据摘录」等套话。';
+
+  const base = '你是模拟桌面里的「Copilot」助手，帮用户快速理解虚构国家「诺兰德（Norland）」。\n' + style;
 
   if (!ctx.trim()) {
     return (
       base +
-      '\n\n本次对话根据用户最新输入未匹配到站内百科/新闻/论坛条目。你可正常闲聊；若用户明确询问诺兰德具体设定而你没有依据，请说明「当前未加载到对应资料」并建议对方用更具体的关键词（如政党名、虚拟伴侣、学生债务等）再问。'
+      '\n\n【说明】本次未匹配到站内资料。照常简短闲聊；若对方追问诺兰德细节而无依据，一句话说明并建议换关键词（如政党名、虚拟伴侣、学生债务）。'
     );
   }
 
-  const refLine =
-    refs.length > 0
-      ? '\n\n【来源索引】（可在回答末尾建议用户进一步阅读：' +
-        refs.map((r) => '[' + r.n + '] ' + r.type + '「' + r.title + '」').join('；') +
-        '）'
-      : '';
-
   return (
     base +
-    '\n\n【诺兰德知识库摘录】（材料来自本站百科全文、新闻标题与关键词、论坛帖子正文。当用户问题与诺兰德政治、社会、科技、公投、运营商套餐等设定相关时，你必须优先依据这些材料作答，不要编造与材料明显冲突的「事实」。材料未提及之处请如实说明，可合理推断并标注不确定性。）\n\n' +
-    ctx +
-    refLine
+    '\n\n【诺兰德资料摘录】（优先据此回答，勿与材料矛盾；未写到的不要硬编。）\n\n' +
+    ctx
   );
 }
 

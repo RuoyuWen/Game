@@ -208,7 +208,7 @@
 | 百科 | `desktop-with-copilot.html` 内 `WIKI_DATA` |
 | 论坛 | `resources/forum-data.js` 内 `FORUM_DATA`（部分帖文源稿见 `CompanionVoting/reddit.md` 等） |
 | NorSense AI 搜索 | `norland-sense.html`；`POST /api/norsense/stream`（NDJSON 流式）由 `norsense.js` 读目录 `norsense-catalog.md`、选源后调用大模型写综述，参考资料单独列出；数据同源 `wiki-data.js`、`norsense-corpus.js`、`forum-data.js` |
-| Copilot（桌面） | `POST /api/chat` 在每次请求前由 `getCopilotSystemMessage()` 根据**最近最多 3 条用户消息**做检索（`resolveSelection` 启发式 + `ensureBroadCoverage`），将百科/新闻/论坛摘录注入 system prompt，与 NorSense 同源数据 |
+| Copilot（桌面） | `POST /api/chat`：`getCopilotSystemMessage()` 检索后**短摘录**注入（`maxTotal`≈5k、单篇百科正文截断更短），system 要求对话式短答；`max_tokens`≈720、`temperature` 0.55 |
 | 百科独立页 | `wiki-view.html?id=<wiki id>`（与桌面同源数据） |
 | 论坛帖子独立页 | `forum-post.html?id=<帖子 id>` |
 | 套餐 | `desktop-with-copilot.html` 内 `SHOPPING_DATA`、`buildPlanContent()` |

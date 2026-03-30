@@ -87,7 +87,8 @@ app.post('/api/chat', async (req, res) => {
     const completion = await client.chat.completions.create({
       model,
       messages: [{ role: 'system', content: systemContent }, ...messages],
-      temperature: 0.65
+      temperature: 0.55,
+      max_tokens: 720
     });
 
     const reply = completion.choices[0]?.message?.content || '抱歉，我无法生成回复。';
