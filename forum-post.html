@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>论坛帖子 - r/Norland</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', sans-serif; background: #0f1419; color: #e7e9ea; min-height: 100vh; padding: 24px; line-height: 1.65; }
+    a { color: #4ecdc4; }
+    .bar { max-width: 720px; margin: 0 auto 20px; }
+    .back { font-size: 14px; }
+    .card { max-width: 720px; margin: 0 auto; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 12px; font-weight: 600; }
+    .meta { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+    .body { font-size: 16px; white-space: pre-wrap; margin-bottom: 24px; }
+    .comments-title { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
+    .comment { padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); font-size: 14px; }
+    .comment .author { color: #4ecdc4; margin-bottom: 4px; }
+    .err { color: #f87171; text-align: center; padding: 40px; }
+  </style>
+</head>
+<body>
+  <div class="bar"><a class="back" href="/norland-sense.html">← 返回 NorSense</a></div>
+  <div id="root"></div>
+  <script src="/resources/forum-data.js"></script>
+  <script>
+    (function () {
+      function escapeHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+      const params = new URLSearchParams(location.search);
+      const id = parseInt(params.get('id'), 10);
+      const root = document.getElementById('root');
+      if (!id || typeof FORUM_DATA === 'undefined') {
+        root.innerHTML = '<div class="err">未找到帖子</div>';
+        return;
+      }
+      const p = FORUM_DATA.find(x => x.id === id);
+      if (!p) {
+        root.innerHTML = '<div class="err">未找到帖子 #' + id + '</div>';
+        return;
+      }
+      document.title = p.title + ' - r/Norland';
+      const commentsHtml = (p.comments || []).slice(0, 30).map(c =>
+        '<div class="comment"><div class="author">u/' + escapeHtml(c.author) + (c.isOP ? ' [楼主]' : '') + ' · ⬆ ' + c.upvotes + '</div><div>' + escapeHtml(c.content) + '</div></div>'
+      ).join('');
+      root.innerHTML =
+        '<article class="card"><h1>' + escapeHtml(p.title) + '</h1>' +
+        '<div class="meta">u/' + escapeHtml(p.author) + ' · ' + escapeHtml(p.time) + ' · ⬆ ' + p.upvotes + '</div>' +
+        '<div class="body">' + escapeHtml(p.content) + '</div>' +
+        '<div class="comments-title">' + (p.comments || []).length + ' 条评论（节选）</div>' + commentsHtml + '</article>';
+    })();
+  </script>
+</body>
+</html>

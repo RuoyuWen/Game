@@ -164,6 +164,7 @@
     .vote-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; color: rgba(255,255,255,0.8); }
     .vote-result-msg { margin-top: 16px; padding: 12px 16px; border-radius: 10px; background: rgba(46,204,113,0.25); border: 1px solid rgba(46,204,113,0.4); color: #5eead4; font-size: 14px; text-align: center; }
     .forum-icon { background: linear-gradient(145deg, #ff4500, #ff6b35); box-shadow: 0 4px 15px rgba(255,69,0,0.5); }
+    .icon-image.norsense-icon { background: linear-gradient(145deg, #0d9488, #6366f1); box-shadow: 0 4px 15px rgba(13, 148, 136, 0.45); }
     #forumWindow .window-content { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
     .forum-app { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
     .forum-list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 16px 0; -webkit-overflow-scrolling: touch; }
@@ -211,6 +212,10 @@
       <div class="desktop-icon" id="forumApp" title="点击打开论坛">
         <div class="icon-image forum-icon">💬</div>
         <span class="icon-label">诺兰德论坛</span>
+      </div>
+      <div class="desktop-icon" id="norsenseApp" title="打开 NorSense 诺感 AI 搜索（新标签页）">
+        <div class="icon-image norsense-icon">🔮</div>
+        <span class="icon-label">诺感搜索</span>
       </div>
     </div>
     <div class="taskbar">
@@ -385,7 +390,7 @@
       <div class="chat-window">
         <div class="chat-messages" id="chatMessages">
           <div class="chat-welcome" id="chatWelcome">
-            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>有什么可以帮你的？
+            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>我会根据站内百科、新闻与论坛资料回答与诺兰德相关的问题；一般问题也可闲聊。
           </div>
         </div>
         <div class="chat-input-area">
@@ -406,6 +411,7 @@
     const voteWindow = document.getElementById('voteWindow');
     const forumApp = document.getElementById('forumApp');
     const forumWindow = document.getElementById('forumWindow');
+    const norsenseApp = document.getElementById('norsenseApp');
     const overlay = document.getElementById('overlay');
     const closeBtn = document.getElementById('closeBtn');
     const copilotCloseBtn = document.getElementById('copilotCloseBtn');
@@ -424,6 +430,7 @@
     copilotApp.addEventListener('click', () => { copilotWindow.classList.add('open'); overlay.classList.add('show'); document.getElementById('chatInput').focus(); });
     voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); showVoteHome(); });
     forumApp.addEventListener('click', () => { forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); });
+    norsenseApp.addEventListener('click', () => { window.open('norland-sense.html', '_blank', 'noopener'); });
 
     function toggleFullscreen(win) {
       win.classList.toggle('fullscreen');

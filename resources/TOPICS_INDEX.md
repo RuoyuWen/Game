@@ -16,10 +16,11 @@
 | 新增/修改套餐/购物（`SHOPPING_DATA`） | 同上 |
 | 新增投票议题、搜索关键词等 | 若形成独立话题，在总览中增行并展开说明 |
 | 新增 `resources/` 下专题素材且可被搜索引用 | 在路径索引中补充 |
+| 新增 NorSense AI 搜索页或相关静态页 | 更新「资源文件路径索引」中的 NorSense / 独立页条目 |
 
 **情感标注**：新条目需标明 **积极** / **消极** / **中立**（定义见文末「情感倾向定义」）。
 
-*最后同步更新：2026-03-25*
+*最后同步更新：2026-03-30*
 
 ---
 
@@ -206,6 +207,10 @@
 | 新闻 | `news/1.html` ~ `news/10.html`，`news/1/` ~ `news/6/` 为媒体首页 |
 | 百科 | `desktop-with-copilot.html` 内 `WIKI_DATA` |
 | 论坛 | `resources/forum-data.js` 内 `FORUM_DATA`（部分帖文源稿见 `CompanionVoting/reddit.md` 等） |
+| NorSense AI 搜索 | `norland-sense.html`；`POST /api/norsense/stream`（NDJSON 流式）由 `norsense.js` 读目录 `norsense-catalog.md`、选源后调用大模型写综述，参考资料单独列出；数据同源 `wiki-data.js`、`norsense-corpus.js`、`forum-data.js` |
+| Copilot（桌面） | `POST /api/chat` 在每次请求前由 `getCopilotSystemMessage()` 根据**最近最多 3 条用户消息**做检索（`resolveSelection` 启发式 + `ensureBroadCoverage`），将百科/新闻/论坛摘录注入 system prompt，与 NorSense 同源数据 |
+| 百科独立页 | `wiki-view.html?id=<wiki id>`（与桌面同源数据） |
+| 论坛帖子独立页 | `forum-post.html?id=<帖子 id>` |
 | 套餐 | `desktop-with-copilot.html` 内 `SHOPPING_DATA`、`buildPlanContent()` |
 | 数字伴侣公投 | `resources/CompanionVoting/CompanionVoting.md`、`resources/CompanionVoting/*.jpeg` |
 | 新闻配图 | `news/images/`（news1.png ~ news10.jpeg） |

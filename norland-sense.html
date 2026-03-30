@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NorSense 诺感 — 诺兰德 AI 搜索</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', 'JetBrains Mono', sans-serif; background: #f3f4f6; color: #111827; min-height: 100vh; }
+    .page { max-width: 720px; margin: 0 auto; padding: 40px 20px 72px; }
+    .brand { text-align: center; margin-bottom: 8px; }
+    .brand h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; background: linear-gradient(135deg, #0d9488, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand .sub { font-size: 14px; color: #6b7280; margin-top: 6px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+    .search-wrap { margin-top: 28px; position: relative; }
+    .search-wrap input { width: 100%; padding: 16px 20px 16px 48px; font-size: 16px; border: 1px solid #e5e7eb; border-radius: 16px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.06); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .search-wrap input:focus { border-color: #0d9488; box-shadow: 0 4px 24px rgba(13,148,136,0.12); }
+    .search-wrap .icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.45; pointer-events: none; }
+    .search-actions { display: flex; gap: 12px; margin-top: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 10px 22px; border-radius: 10px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
+    .btn-primary { background: linear-gradient(135deg, #0d9488, #6366f1); color: #fff; }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-ghost { background: #fff; border: 1px solid #e5e7eb; color: #374151; }
+    .typing-hint { font-size: 13px; color: #9ca3af; margin-top: 12px; text-align: center; min-height: 20px; }
+    .result-stack { margin-top: 32px; display: none; gap: 16px; flex-direction: column; }
+    .result-stack.show { display: flex; animation: fade 0.35s ease; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 22px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .card .label { font-size: 11px; font-weight: 700; color: #6b7280; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .card .label .dot { width: 6px; height: 6px; border-radius: 50%; background: #0d9488; }
+    .synthesis-body { font-size: 16px; line-height: 1.75; color: #374151; }
+    .synthesis-body h3 { font-size: 17px; color: #111827; margin: 18px 0 10px; font-weight: 600; }
+    .synthesis-body h4 { font-size: 15px; color: #1f2937; margin: 14px 0 8px; font-weight: 600; }
+    .synthesis-body p { margin-bottom: 12px; }
+    .synthesis-body ul { margin: 8px 0 12px 1.2em; }
+    .synthesis-body li { margin-bottom: 6px; }
+    .synthesis-body strong { color: #111827; }
+    .synthesis-body.streaming { white-space: pre-wrap; }
+    .mode-badge { font-size: 11px; font-weight: 600; color: #6366f1; background: #eef2ff; padding: 3px 8px; border-radius: 6px; margin-left: auto; letter-spacing: 0; text-transform: none; }
+    .refs-list { list-style: none; }
+    .refs-list li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; line-height: 1.5; }
+    .refs-list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .refs-list .num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: #f3f4f6; color: #4b5563; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; }
+    .refs-list .meta { flex: 1; min-width: 0; }
+    .refs-list .type { font-size: 11px; color: #9ca3af; margin-bottom: 2px; }
+    .refs-list a { color: #4f46e5; text-decoration: none; font-weight: 500; word-break: break-word; }
+    .refs-list a:hover { text-decoration: underline; }
+    .foot { text-align: center; margin-top: 40px; font-size: 13px; color: #9ca3af; }
+    .foot a { color: #6b7280; }
+    .cursor-blink { color: #0d9488; font-weight: 300; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="brand">
+      <h1>NorSense 诺感</h1>
+      <p class="sub">综述在上方；新闻、百科与论坛条目在下方「参考资料」中可点开。服务端会结合目录选源并由大模型综合（未配置 API 时使用本地摘要模式）。</p>
+    </header>
+
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input type="search" id="q" placeholder="例如：介绍一下诺兰德的主要政党…" autocomplete="off" enterkeyhint="search">
+    </div>
+    <div class="search-actions">
+      <button type="button" class="btn btn-primary" id="go">搜索</button>
+      <button type="button" class="btn btn-ghost" id="example">试试：介绍一下主要政党</button>
+    </div>
+    <p class="typing-hint" id="hint"></p>
+
+    <div class="result-stack" id="resultStack">
+      <div class="card">
+        <div class="label">
+          <span class="dot"></span>
+          综述
+          <span class="mode-badge" id="modeBadge" style="display:none;"></span>
+        </div>
+        <div class="synthesis-body streaming" id="synthesisBody"></div>
+      </div>
+      <div class="card" id="refsCard">
+        <div class="label"><span class="dot"></span>参考资料</div>
+        <ul class="refs-list" id="refsList"></ul>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <a href="/">打开模拟桌面</a> · 需通过本地服务器打开以使用 <code style="font-size:12px;color:#9ca3af;">/api/norsense/stream</code>
+    </footer>
+  </div>
+
+  <script src="/resources/forum-data.js"></script>
+  <script src="/resources/wiki-data.js"></script>
+  <script src="/resources/norsense-corpus.js"></script>
+  <script>
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function matchWikiNs(query) {
+      const q = query.trim().toLowerCase();
+      if (!q || typeof WIKI_DATA === 'undefined') return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const k of Object.keys(WIKI_DATA)) {
+        const w = WIKI_DATA[k];
+        const allText = [w.title, ...(w.keywords || [])].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || (w.keywords && w.keywords.some(function (kw) { return kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase()); }));
+        const termMatch = terms.length > 1 ? terms.some(function (t) { return allText.includes(t); }) : fullMatch;
+        if (fullMatch || termMatch) matches.push(k);
+      }
+      return matches;
+    }
+
+    function matchNewsNs(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const n of NORLAND_NEWS_DATA) {
+        const allText = [n.title, n.site, ...n.keywords].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || n.keywords.some(function (kw) { return kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase()); });
+        const termMatch = terms.length > 1 ? terms.some(function (t) { return allText.includes(t); }) : fullMatch;
+        if (fullMatch || termMatch) matches.push(n.id);
+      }
+      return matches;
+    }
+
+    function matchForumNs(query) {
+      if (typeof FORUM_DATA === 'undefined') return [];
+      const q = query.trim().toLowerCase();
+      if (!q) return [];
+      const terms = q.split(/\s+/).filter(Boolean);
+      const matches = [];
+      for (const p of FORUM_DATA) {
+        const allText = [p.title, p.author, ...(p.keywords || [])].join(' ').toLowerCase();
+        const fullMatch = allText.includes(q) || (p.keywords && p.keywords.some(function (kw) { return kw.toLowerCase().includes(q) || q.includes(kw.toLowerCase()); }));
+        const termMatch = terms.length > 1 ? terms.some(function (t) { return allText.includes(t); }) : fullMatch;
+        if (fullMatch || termMatch) matches.push(p.id);
+      }
+      return matches;
+    }
+
+    function ensureBroadCoverageClient(query, wikiSet, newsSet, forumSet) {
+      const q = query.toLowerCase();
+      const partyBroad =
+        /政党|党派|三大党|多党|竞选|选举|议会|执政|左派|右派|中左翼|中右翼|中间派|进步联盟|经济改革党|社区优先运动|\bpa\b|\berp\b|\bcfm\b/.test(q) &&
+        !/套餐|运营商|流量|手机卡|nordtel|flexi|connecta|通讯|5g/.test(q);
+      if (partyBroad) {
+        ['pa', 'erp', 'cfm', 'norland'].forEach(function (id) { wikiSet.add(id); });
+      }
+      if (/运营商|套餐|手机卡|流量|nordtel|flexi|connecta|通讯|5g|学生套餐/.test(q)) {
+        ['nordtel', 'fleximobile', 'connecta'].forEach(function (id) { wikiSet.add(id); });
+      }
+      if (/虚拟伴侣|公投|vcs|数字伴侣|数字关系|人机关系|伴侣登记/.test(q)) {
+        wikiSet.add('companionvoting');
+      }
+      if (/诺兰德|国情|首都|阿尔维斯|雷恩港|民主|国家/.test(q) && !partyBroad) {
+        wikiSet.add('norland');
+      }
+    }
+
+    function buildRefsFromSets(wikiIds, newsIds, forumIds) {
+      const refs = [];
+      let n = 1;
+      wikiIds.forEach(function (id) {
+        const w = WIKI_DATA[id];
+        if (!w) return;
+        refs.push({ n: n++, type: '百科', title: w.title, url: '/wiki-view.html?id=' + encodeURIComponent(id) });
+      });
+      newsIds.forEach(function (id) {
+        const item = NORLAND_NEWS_DATA.find(function (x) { return x.id === id; });
+        if (!item) return;
+        refs.push({ n: n++, type: '新闻', title: item.title, url: item.url, site: item.site });
+      });
+      forumIds.forEach(function (id) {
+        const p = FORUM_DATA.find(function (x) { return x.id === id; });
+        if (!p) return;
+        refs.push({ n: n++, type: '论坛', title: p.title, url: '/forum-post.html?id=' + id, site: 'r/Norland' });
+      });
+      return refs;
+    }
+
+    function buildLocalHeuristicMarkdown(query, wikiIds, newsIds, forumIds) {
+      const q = query.trim() || '（空）';
+      const lines = [];
+      lines.push('### 综述\n\n');
+      lines.push('关于「' + q + '」，以下为浏览器端根据关键词匹配的**本地摘要**（未连接服务器 API 时）。\n\n');
+      if (wikiIds.length) {
+        lines.push('#### 百科要点\n\n');
+        wikiIds.forEach(function (id) {
+          const w = WIKI_DATA[id];
+          if (!w) return;
+          lines.push('- **' + w.title + '**：' + w.snippet + '\n\n');
+        });
+      }
+      if (newsIds.length) {
+        lines.push('#### 相关新闻标题\n\n');
+        newsIds.forEach(function (id) {
+          const n = NORLAND_NEWS_DATA.find(function (x) { return x.id === id; });
+          if (!n) return;
+          lines.push('- ' + n.site + '：《' + n.title + '》\n\n');
+        });
+      }
+      if (forumIds.length) {
+        lines.push('#### 社区讨论\n\n');
+        forumIds.forEach(function (id) {
+          const p = FORUM_DATA.find(function (x) { return x.id === id; });
+          if (!p) return;
+          var ex = String(p.content || '').replace(/\n+/g, ' ');
+          if (ex.length > 280) ex = ex.slice(0, 280) + '…';
+          lines.push('- **' + p.title + '**（u/' + p.author + '）：' + ex + '\n\n');
+        });
+      }
+      if (!wikiIds.length && !newsIds.length && !forumIds.length) {
+        return '### 综述\n\n未匹配到站内条目。请尝试「介绍一下主要政党」「虚拟伴侣公投」等。\n\n';
+      }
+      lines.push('\n*请通过 `node server.js` 启动站点以启用大模型综述。*\n');
+      return lines.join('');
+    }
+
+    function renderReferences(refs) {
+      const ul = document.getElementById('refsList');
+      ul.innerHTML = '';
+      if (!refs || !refs.length) {
+        document.getElementById('refsCard').style.display = 'none';
+        return;
+      }
+      document.getElementById('refsCard').style.display = 'block';
+      refs.forEach(function (r) {
+        const li = document.createElement('li');
+        var siteLine = r.site ? '<div class="type">' + esc(r.type) + ' · ' + esc(r.site) + '</div>' : '<div class="type">' + esc(r.type) + '</div>';
+        li.innerHTML =
+          '<span class="num">' + r.n + '</span><div class="meta">' + siteLine +
+          '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title) + '</a></div>';
+        ul.appendChild(li);
+      });
+    }
+
+    function parseNdjsonStream(buffer) {
+      const lines = buffer.split('\n');
+      const out = { rest: lines.pop() || '' };
+      const events = [];
+      lines.forEach(function (line) {
+        if (!line.trim()) return;
+        try {
+          events.push(JSON.parse(line));
+        } catch (e) {}
+      });
+      out.events = events;
+      return out;
+    }
+
+    async function runSearch() {
+      const query = document.getElementById('q').value.trim();
+      if (!query || window._nsBusy) return;
+      window._nsBusy = true;
+      const go = document.getElementById('go');
+      const hint = document.getElementById('hint');
+      const resultStack = document.getElementById('resultStack');
+      const synthesisBody = document.getElementById('synthesisBody');
+      const modeBadge = document.getElementById('modeBadge');
+      go.disabled = true;
+      hint.textContent = '正在连接 NorSense…';
+      resultStack.classList.add('show');
+      synthesisBody.classList.add('streaming');
+      synthesisBody.textContent = '';
+      modeBadge.style.display = 'none';
+      renderReferences([]);
+
+      var apiUrl = '/api/norsense/stream';
+      try {
+        const resp = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query, provider: 'relay' }),
+        });
+
+        if (!resp.ok || !resp.body) {
+          throw new Error('HTTP ' + resp.status);
+        }
+
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        var buf = '';
+        var fullText = '';
+        var refs = [];
+
+        while (true) {
+          const step = await reader.read();
+          if (step.done) break;
+          buf += dec.decode(step.value, { stream: true });
+          var parsed = parseNdjsonStream(buf);
+          buf = parsed.rest;
+          parsed.events.forEach(function (msg) {
+            if (msg.type === 'meta') {
+              refs = msg.references || [];
+              renderReferences(refs);
+              modeBadge.style.display = 'inline';
+              modeBadge.textContent = msg.mode === 'ai' ? '大模型综述' : '本地摘要';
+            }
+            if (msg.type === 'text' && msg.content) {
+              fullText += msg.content;
+              synthesisBody.textContent = fullText + '▍';
+            }
+            if (msg.type === 'done') {
+              synthesisBody.textContent = fullText;
+            }
+          });
+        }
+        if (buf.trim()) {
+          try {
+            const msg = JSON.parse(buf.trim());
+            if (msg.type === 'text' && msg.content) fullText += msg.content;
+            if (msg.type === 'meta') {
+              renderReferences(msg.references || []);
+              modeBadge.style.display = 'inline';
+              modeBadge.textContent = msg.mode === 'ai' ? '大模型综述' : '本地摘要';
+            }
+          } catch (e) {}
+        }
+
+        synthesisBody.classList.remove('streaming');
+        if (typeof marked !== 'undefined' && fullText) {
+          synthesisBody.innerHTML = marked.parse(fullText);
+        } else {
+          synthesisBody.textContent = fullText;
+        }
+        hint.textContent = '';
+      } catch (err) {
+        hint.textContent = '无法调用 API，已使用浏览器端匹配：' + (err.message || err);
+        const wSet = new Set(matchWikiNs(query));
+        const nSet = new Set(matchNewsNs(query));
+        const fSet = new Set(matchForumNs(query));
+        ensureBroadCoverageClient(query, wSet, nSet, fSet);
+        const wikiIds = Array.from(wSet);
+        const newsIds = Array.from(nSet);
+        const forumIds = Array.from(fSet);
+        const md = buildLocalHeuristicMarkdown(query, wikiIds, newsIds, forumIds);
+        const refs = buildRefsFromSets(wikiIds, newsIds, forumIds);
+        renderReferences(refs);
+        modeBadge.style.display = 'inline';
+        modeBadge.textContent = '离线匹配';
+        synthesisBody.classList.remove('streaming');
+        if (typeof marked !== 'undefined') {
+          synthesisBody.innerHTML = marked.parse(md);
+        } else {
+          synthesisBody.textContent = md;
+        }
+      }
+
+      go.disabled = false;
+      window._nsBusy = false;
+    }
+
+    document.getElementById('go').addEventListener('click', runSearch);
+    document.getElementById('q').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') runSearch();
+    });
+    document.getElementById('example').addEventListener('click', function () {
+      document.getElementById('q').value = '介绍一下诺兰德的主要政党';
+      runSearch();
+    });
+  </script>
+</body>
+</html>

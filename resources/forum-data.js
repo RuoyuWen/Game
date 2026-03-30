@@ -217,3 +217,7 @@ const FORUM_DATA = [
     { id: '11-40', author: 'MarketRealist', upvotes: 230, content: '或者说，这个问题来得太快了。', isOP: false }
   ], keywords: ['虚拟伴侣', '公投', '数字伴侣', '法律关系', 'VCS', 'AI', '诺兰德', '孤独', '社会'] }
 ];
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports.FORUM_DATA = FORUM_DATA;
+}

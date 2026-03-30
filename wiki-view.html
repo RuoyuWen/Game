@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>百科 - NorSense</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; padding: 24px; line-height: 1.7; }
+    a { color: #0066cc; }
+    .bar { max-width: 800px; margin: 0 auto 20px; }
+    .article { max-width: 800px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .article h1 { font-size: 26px; margin-bottom: 16px; color: #1d1d1f; border-bottom: 1px solid #e5e5e7; padding-bottom: 12px; }
+    .article h2 { font-size: 18px; margin: 24px 0 12px; color: #0d9488; }
+    .article p { margin-bottom: 12px; font-size: 16px; }
+    .article ul { margin: 0 0 12px 20px; }
+    .wiki-emblem, .wiki-logo { margin: 0 auto 20px; display: flex; justify-content: center; }
+    .wiki-logo img { max-width: 120px; max-height: 120px; object-fit: contain; }
+    .err { text-align: center; padding: 48px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="bar"><a href="/norland-sense.html">← 返回 NorSense</a></div>
+  <main id="main" class="article"></main>
+  <script src="/resources/wiki-data.js"></script>
+  <script>
+    (function () {
+      const id = new URLSearchParams(location.search).get('id');
+      const el = document.getElementById('main');
+      if (!id || typeof WIKI_DATA === 'undefined' || !WIKI_DATA[id]) {
+        el.className = 'err';
+        el.textContent = '未找到百科条目';
+        return;
+      }
+      const w = WIKI_DATA[id];
+      document.title = w.title + ' - 百科';
+      el.innerHTML = (w.emblem || '') + w.content;
+    })();
+  </script>
+</body>
+</html>

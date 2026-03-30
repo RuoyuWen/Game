@@ -29,6 +29,8 @@ function buildDirectClient() {
 const relayClient = buildRelayClient();
 const directClient = buildDirectClient();
 
+const { runNorSensePipeline, getCopilotSystemMessage } = require('./norsense.js');
+
 if (relayClient) console.log('📡 学顶猫中转: 已就绪');
 if (directClient) console.log('🔗 直连 OpenAI: 已就绪');
 if (!relayClient && !directClient) console.warn('⚠️  请在 .env 中配置 OPENAI_API_KEY（中转）或 OPENAI_DIRECT_API_KEY（直连）');
@@ -38,6 +40,33 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // 聊天 API 接口 - provider: 'relay' | 'openai'
+/** NorSense：选源 + 流式综述（NDJSON：meta → text 片段 → done） */
+app.post('/api/norsense/stream', async (req, res) => {
+  try {
+    const { query, provider = 'relay' } = req.body || {};
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: '需要 JSON body: { query: string }' });
+    }
+    const q = query.trim();
+    if (!q) {
+      return res.status(400).json({ error: 'query 不能为空' });
+    }
+    const client = provider === 'openai' ? directClient : relayClient;
+    await runNorSensePipeline(q, client, model, res);
+    res.end();
+  } catch (err) {
+    console.error('NorSense stream:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message || 'NorSense 请求失败' });
+    } else {
+      try {
+        res.write(JSON.stringify({ type: 'error', message: err.message }) + '\n');
+        res.end();
+      } catch (_) {}
+    }
+  }
+});
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages, provider = 'relay' } = req.body;
@@ -53,13 +82,12 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: tip });
     }
 
+    const systemContent = await getCopilotSystemMessage(messages, model);
+
     const completion = await client.chat.completions.create({
       model,
-      messages: [
-        { role: 'system', content: '你是一个友好、专业的 AI 助手。请用简洁清晰的中文回答用户问题。' },
-        ...messages
-      ],
-      temperature: 0.7
+      messages: [{ role: 'system', content: systemContent }, ...messages],
+      temperature: 0.65
     });
 
     const reply = completion.choices[0]?.message?.content || '抱歉，我无法生成回复。';
