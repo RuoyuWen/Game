@@ -192,10 +192,78 @@
     .forum-back:hover { text-decoration: underline; }
     .forum-post-meta-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
     .forum-post-upvotes { color: #ff6b35; }
+    .desktop-icon.hidden-by-version { display: none; }
+    body.locked { overflow: hidden; }
+    .desktop.locked { filter: blur(2px); pointer-events: none; user-select: none; }
+    .code-gate {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 10, 20, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+    }
+    .code-gate.hidden { display: none; }
+    .code-gate-panel {
+      width: min(420px, 92vw);
+      padding: 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.94));
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+      color: #fff;
+    }
+    .code-gate-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .code-gate-subtitle { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-bottom: 12px; }
+    .code-gate-row { display: flex; gap: 8px; }
+    .version-code-input {
+      flex: 1;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: 0 10px;
+      outline: none;
+      letter-spacing: 2px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .version-code-input:focus {
+      border-color: #4ecdc4;
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+    .version-apply-btn {
+      height: 38px;
+      border: none;
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(145deg, #0d9488, #6366f1);
+    }
+    .version-meta { margin-top: 8px; font-size: 12px; color: rgba(255, 255, 255, 0.72); line-height: 1.45; }
+    .version-error { margin-top: 6px; font-size: 12px; color: #fda4af; min-height: 16px; }
   </style>
 </head>
-<body>
-  <div class="desktop">
+<body class="locked">
+  <div class="code-gate" id="codeGate">
+    <div class="code-gate-panel">
+      <div class="code-gate-title">请输入 4 位代码</div>
+      <div class="code-gate-subtitle">验证通过后进入对应版本</div>
+      <div class="code-gate-row">
+        <input type="text" id="versionCodeInput" class="version-code-input" maxlength="4" placeholder="输入 4 位码" autocomplete="off">
+        <button class="version-apply-btn" id="versionApplyBtn">进入</button>
+      </div>
+      <div class="version-meta" id="versionMeta">等待输入代码</div>
+      <div class="version-error" id="versionError"></div>
+    </div>
+  </div>
+  <div class="desktop locked" id="desktopRoot">
     <div class="desktop-icons">
       <div class="desktop-icon" id="searchApp" title="点击打开搜索引擎">
         <div class="icon-image">🔎</div>
@@ -419,6 +487,47 @@
     const forumCloseBtn = document.getElementById('forumCloseBtn');
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
+    const desktopRoot = document.getElementById('desktopRoot');
+    const codeGate = document.getElementById('codeGate');
+    const versionCodeInput = document.getElementById('versionCodeInput');
+    const versionApplyBtn = document.getElementById('versionApplyBtn');
+    const versionMeta = document.getElementById('versionMeta');
+    const versionError = document.getElementById('versionError');
+    const VERSION_CONFIGS = {
+      '7381': { id: 'v1', label: 'Version 1', copilot: true, aiSearch: false },
+      '2906': { id: 'v2', label: 'Version 2', copilot: true, aiSearch: false },
+      '6147': { id: 'v3', label: 'Version 3', copilot: false, aiSearch: true },
+      '8573': { id: 'v4', label: 'Version 4', copilot: false, aiSearch: true }
+    };
+    let currentVersionCode = '';
+
+    function getVersionFeatureText(cfg) {
+      if (!cfg) return '当前：未设置';
+      const copilotText = cfg.copilot ? 'Copilot: 开启' : 'Copilot: 关闭';
+      const aiSearchText = cfg.aiSearch ? 'AI Search: 开启' : 'AI Search: 关闭';
+      return '当前：' + cfg.label + '（代码 ' + currentVersionCode + '） · ' + copilotText + ' · ' + aiSearchText;
+    }
+
+    function applyVersionByCode(rawCode) {
+      const code = String(rawCode || '').replace(/\D/g, '').slice(0, 4);
+      const cfg = VERSION_CONFIGS[code];
+      if (!cfg) {
+        versionError.textContent = '无效代码，请输入有效 4 位版本码';
+        return false;
+      }
+      currentVersionCode = code;
+      versionError.textContent = '';
+      versionMeta.textContent = getVersionFeatureText(cfg);
+      versionCodeInput.value = code;
+      copilotApp.classList.toggle('hidden-by-version', !cfg.copilot);
+      norsenseApp.classList.toggle('hidden-by-version', !cfg.aiSearch);
+      if (!cfg.copilot) {
+        copilotWindow.classList.remove('open');
+        copilotWindow.classList.remove('fullscreen');
+      }
+      if (!anyWindowOpen()) overlay.classList.remove('show');
+      return true;
+    }
 
     function updateClock() {
       document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
@@ -427,10 +536,43 @@
     setInterval(updateClock, 1000);
 
     searchApp.addEventListener('click', () => { searchWindow.classList.add('open'); overlay.classList.add('show'); showHome(); searchInput.focus(); });
-    copilotApp.addEventListener('click', () => { copilotWindow.classList.add('open'); overlay.classList.add('show'); document.getElementById('chatInput').focus(); });
+    copilotApp.addEventListener('click', () => {
+      const cfg = VERSION_CONFIGS[currentVersionCode];
+      if (cfg && !cfg.copilot) {
+        return;
+      }
+      copilotWindow.classList.add('open');
+      overlay.classList.add('show');
+      document.getElementById('chatInput').focus();
+    });
     voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); showVoteHome(); });
     forumApp.addEventListener('click', () => { forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); });
-    norsenseApp.addEventListener('click', () => { window.open('norland-sense.html', '_blank', 'noopener'); });
+    norsenseApp.addEventListener('click', () => {
+      const cfg = VERSION_CONFIGS[currentVersionCode];
+      if (cfg && !cfg.aiSearch) {
+        return;
+      }
+      window.open('norland-sense.html', '_blank', 'noopener');
+    });
+
+    versionApplyBtn.addEventListener('click', () => {
+      const ok = applyVersionByCode(versionCodeInput.value);
+      if (!ok) return;
+      codeGate.classList.add('hidden');
+      desktopRoot.classList.remove('locked');
+      document.body.classList.remove('locked');
+    });
+    versionCodeInput.addEventListener('input', () => {
+      versionCodeInput.value = versionCodeInput.value.replace(/\D/g, '').slice(0, 4);
+      versionError.textContent = '';
+    });
+    versionCodeInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        versionApplyBtn.click();
+      }
+    });
+    versionCodeInput.focus();
 
     function toggleFullscreen(win) {
       win.classList.toggle('fullscreen');
