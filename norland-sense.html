@@ -57,7 +57,7 @@
   <div class="page">
     <header class="brand">
       <h1>NorSense 诺感</h1>
-      <p class="sub">综述在上方；新闻、百科与论坛条目在下方「参考资料」中可点开。服务端会结合目录选源并由大模型综合（未配置 API 时使用本地摘要模式）。</p>
+      <p class="sub">诺兰德本土的 AI 检索服务：从百科、要闻与国民论坛中为您的提问调取可查信息，并按官方口径综述。以下回答仅基于服务端已编入的公开信息。</p>
     </header>
 
     <div class="search-wrap">
@@ -86,7 +86,7 @@
     </div>
 
     <footer class="foot">
-      <a href="/">打开模拟桌面</a> · 需通过本地服务器打开以使用 <code style="font-size:12px;color:#9ca3af;">/api/norsense/stream</code>
+      <a href="/">返回工作台</a>
     </footer>
   </div>
 
@@ -270,11 +270,12 @@
       renderReferences([]);
 
       var apiUrl = '/api/norsense/stream';
+      var versionCode = (new URLSearchParams(window.location.search).get('v') || '').trim();
       try {
         const resp = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: query, provider: 'relay' }),
+          body: JSON.stringify({ query: query, provider: 'relay', versionCode: versionCode }),
         });
 
         if (!resp.ok || !resp.body) {

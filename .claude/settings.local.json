@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"f:\\\\Vibe\\\\Skills\\\\Game\" -Recurse -Exclude \"node_modules\" -Filter \"*.html\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(node scripts/annotate-forum.js)",
+      "Bash(node -e \"require\\('./norsense.js'\\); console.log\\('OK'\\)\")"
+    ]
+  }
+}

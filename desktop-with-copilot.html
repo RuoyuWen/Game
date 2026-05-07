@@ -20,9 +20,9 @@
     .taskbar { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
     .taskbar-start { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(145deg, #4ecdc4, #44a08d); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
     .taskbar-time { margin-left: auto; color: rgba(255, 255, 255, 0.8); font-size: 12px; font-variant-numeric: tabular-nums; }
-    .app-window { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 90vw; height: auto; background: rgba(26, 26, 46, 0.95); border-radius: 12px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08); overflow: hidden; display: none; flex-direction: column; z-index: 100; transition: all 0.25s ease; }
-    .app-window.open { display: flex; animation: windowOpen 0.3s ease; }
-    .app-window.fullscreen { top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none; border-radius: 0; z-index: 101; }
+    .app-window { position: absolute; width: 560px; max-width: 90vw; height: auto; background: rgba(26, 26, 46, 0.95); border-radius: 12px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08); overflow: hidden; display: none; flex-direction: column; z-index: 100; }
+    .app-window.open { display: flex; animation: windowOpen 0.2s ease; }
+    .app-window.fullscreen { top: 0 !important; left: 0 !important; right: 0; bottom: 0; width: 100% !important; height: 100vh !important; max-width: none; transform: none !important; border-radius: 0; z-index: 500 !important; }
     .app-window.fullscreen .chat-messages, .app-window.fullscreen .search-results { max-height: none; flex: 1; }
     .app-window.fullscreen .wiki-view, .app-window.fullscreen .news-view, .app-window.fullscreen .shopping-view { flex: 1; min-height: 0; }
     .app-window.fullscreen .news-view iframe { min-height: none; flex: 1; height: 100%; }
@@ -33,8 +33,8 @@
     .app-window.copilot-window { height: 520px; }
     #voteWindow .window-content { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
     #voteWindow .vote-app { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-    @keyframes windowOpen { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-    .window-titlebar { height: 36px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+    @keyframes windowOpen { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .window-titlebar { height: 36px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; padding: 0 12px; gap: 8px; cursor: move; user-select: none; }
     .window-buttons { display: flex; gap: 6px; }
     .window-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
     .window-btn.close { background: #ff5f56; }
@@ -193,8 +193,31 @@
     .forum-post-meta-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.5); }
     .forum-post-upvotes { color: #ff6b35; }
     .desktop-icon.hidden-by-version { display: none; }
+    .desktop-icon.vote-highlight { border: 1.5px solid rgba(245, 158, 11, 0.7); box-shadow: 0 0 10px rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.06); }
+    .desktop-icon.vote-highlight:hover { background: rgba(245, 158, 11, 0.14); }
     body.locked { overflow: hidden; }
     .desktop.locked { filter: blur(2px); pointer-events: none; user-select: none; }
+    .quiz-title { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 4px; text-align: center; }
+    .quiz-subtitle { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 18px; text-align: center; }
+    .quiz-progress { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 14px; text-align: center; letter-spacing: 0.5px; }
+    .quiz-question { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.92); line-height: 1.55; margin-bottom: 18px; text-align: center; }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-option-btn { padding: 11px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.88); font-size: 14px; font-family: inherit; cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s; }
+    .quiz-option-btn:hover:not(:disabled) { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.4); }
+    .quiz-option-btn.correct { background: rgba(34,197,94,0.22); border-color: #22c55e; color: #fff; }
+    .quiz-option-btn.wrong { background: rgba(239,68,68,0.22); border-color: #ef4444; color: #fff; animation: quizShake 0.35s ease; }
+    @keyframes quizShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+    .quiz-input-row { display: flex; gap: 10px; margin-top: 4px; }
+    .quiz-num-input { flex: 1; padding: 11px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font-size: 18px; font-family: 'JetBrains Mono', monospace; outline: none; transition: border-color 0.15s; -moz-appearance: textfield; appearance: textfield; }
+    .quiz-num-input::-webkit-inner-spin-button, .quiz-num-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .quiz-num-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.18); }
+    .quiz-num-input::placeholder { color: rgba(255,255,255,0.3); font-size: 13px; font-family: inherit; }
+    .quiz-num-input.correct { border-color: #22c55e; background: rgba(34,197,94,0.15); }
+    .quiz-num-input.wrong { border-color: #ef4444; background: rgba(239,68,68,0.15); animation: quizShake 0.35s ease; }
+    .quiz-submit-btn { padding: 11px 24px; border-radius: 10px; border: none; background: linear-gradient(145deg, #d97706, #f59e0b); color: #fff; font-size: 14px; font-family: inherit; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+    .quiz-submit-btn:hover:not(:disabled) { opacity: 0.88; }
+    .quiz-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .quiz-input-hint { font-size: 12px; color: rgba(255,255,255,0.38); margin-top: 8px; text-align: center; }
     .code-gate {
       position: fixed;
       inset: 0;
@@ -265,15 +288,7 @@
   </div>
   <div class="desktop locked" id="desktopRoot">
     <div class="desktop-icons">
-      <div class="desktop-icon" id="searchApp" title="点击打开搜索引擎">
-        <div class="icon-image">🔎</div>
-        <span class="icon-label">G00GLE</span>
-      </div>
-      <div class="desktop-icon" id="copilotApp" title="点击打开 AI 助手">
-        <div class="icon-image copilot-icon">✨</div>
-        <span class="icon-label">Copilot</span>
-      </div>
-      <div class="desktop-icon" id="voteApp" title="点击打开投票">
+      <div class="desktop-icon vote-highlight" id="voteApp" title="点击打开投票">
         <div class="icon-image vote-icon">🗳️</div>
         <span class="icon-label">投票</span>
       </div>
@@ -281,9 +296,17 @@
         <div class="icon-image forum-icon">💬</div>
         <span class="icon-label">诺兰德论坛</span>
       </div>
+      <div class="desktop-icon" id="searchApp" title="点击打开搜索引擎">
+        <div class="icon-image">🔎</div>
+        <span class="icon-label">G00GLE</span>
+      </div>
       <div class="desktop-icon" id="norsenseApp" title="打开 NorSense 诺感 AI 搜索（新标签页）">
         <div class="icon-image norsense-icon">🔮</div>
         <span class="icon-label">诺感搜索</span>
+      </div>
+      <div class="desktop-icon" id="copilotApp" title="点击打开 AI 助手">
+        <div class="icon-image copilot-icon">✨</div>
+        <span class="icon-label">Copilot</span>
       </div>
     </div>
     <div class="taskbar">
@@ -372,6 +395,16 @@
           <div class="vote-category" id="voteCategoryProduct"><div class="vote-category-icon">📱</div><span class="vote-category-name">产品选择</span><span class="vote-category-arrow">→</span></div>
           <div class="vote-category" id="voteCategoryCompanion"><div class="vote-category-icon">💜</div><span class="vote-category-name">数字伴侣公投</span><span class="vote-category-arrow">→</span></div>
         </div>
+        <div class="vote-page" id="voteQuizPage">
+          <div class="vote-back" id="voteBackFromQuiz">← 返回</div>
+          <div style="padding: 0 4px 20px;">
+            <div class="quiz-title" id="quizTitle">答题</div>
+            <div class="quiz-subtitle" id="quizSubtitle">回答 3 道题后解锁投票</div>
+            <div class="quiz-progress" id="quizProgress">第 1 题 / 共 3 题</div>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="quiz-options" id="quizOptions"></div>
+          </div>
+        </div>
         <div class="vote-page" id="voteProductPage">
           <div class="vote-back" id="voteBackFromProduct">← 返回</div>
           <div class="vote-title">产品选择</div>
@@ -458,7 +491,7 @@
       <div class="chat-window">
         <div class="chat-messages" id="chatMessages">
           <div class="chat-welcome" id="chatWelcome">
-            <strong>✨ 你好！我是 Copilot AI 助手</strong><br>诺兰德相关的问题会参考站内资料，回答尽量简短；想听细节可以说「详细说说」。
+            <strong>✨ Copilot · 你好</strong><br>我是在诺兰德境内提供的对话助手：只依据已接入的<strong>可查公开信息</strong>答复国情、时政与公共讨论类问题；超出范围时请见谅，可把问题换到政党、都城、大选或民生议题上试试看。
           </div>
         </div>
         <div class="chat-input-area">
@@ -494,7 +527,7 @@
     const versionMeta = document.getElementById('versionMeta');
     const versionError = document.getElementById('versionError');
     const VERSION_CONFIGS = {
-      '7381': { id: 'v1', label: 'Version 1', copilot: true, aiSearch: false },
+      '7381': { id: 'v1', label: 'Version 1', copilot: true, aiSearch: true },
       '2906': { id: 'v2', label: 'Version 2', copilot: true, aiSearch: false },
       '6147': { id: 'v3', label: 'Version 3', copilot: false, aiSearch: true },
       '8573': { id: 'v4', label: 'Version 4', copilot: false, aiSearch: true }
@@ -521,11 +554,7 @@
       versionCodeInput.value = code;
       copilotApp.classList.toggle('hidden-by-version', !cfg.copilot);
       norsenseApp.classList.toggle('hidden-by-version', !cfg.aiSearch);
-      if (!cfg.copilot) {
-        copilotWindow.classList.remove('open');
-        copilotWindow.classList.remove('fullscreen');
-      }
-      if (!anyWindowOpen()) overlay.classList.remove('show');
+      if (!cfg.copilot) closeWin(copilotWindow);
       return true;
     }
 
@@ -535,24 +564,67 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    searchApp.addEventListener('click', () => { searchWindow.classList.add('open'); overlay.classList.add('show'); showHome(); searchInput.focus(); });
+    // Multi-window draggable system
+    let zTop = 100;
+    function bringToFront(win) { win.style.zIndex = ++zTop; }
+    const WIN_DEFAULTS = {
+      voteWindow:    { top: 70,  left: 160 },
+      searchWindow:  { top: 100, left: 230 },
+      forumWindow:   { top: 85,  left: 195 },
+      copilotWindow: { top: 110, left: 265 },
+    };
+    function openWin(win) {
+      if (!win._positioned) {
+        const d = WIN_DEFAULTS[win.id] || { top: 80, left: 120 };
+        win.style.top = d.top + 'px';
+        win.style.left = d.left + 'px';
+        win.style.transform = 'none';
+        win._positioned = true;
+      }
+      win.classList.add('open');
+      bringToFront(win);
+    }
+    function closeWin(win) { win.classList.remove('open', 'fullscreen'); }
+    function makeDraggable(win) {
+      const tb = win.querySelector('.window-titlebar');
+      let active = false, sx, sy, ox, oy;
+      tb.addEventListener('mousedown', e => {
+        if (e.target.closest('.window-buttons')) return;
+        active = true; bringToFront(win);
+        const r = win.getBoundingClientRect();
+        sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!active) return;
+        win.style.left = Math.max(0, ox + e.clientX - sx) + 'px';
+        win.style.top  = Math.max(0, oy + e.clientY - sy) + 'px';
+        win.style.transform = 'none';
+        win._positioned = true;
+      });
+      document.addEventListener('mouseup', () => { active = false; });
+      win.addEventListener('mousedown', () => bringToFront(win));
+    }
+    [searchWindow, copilotWindow, voteWindow, forumWindow].forEach(makeDraggable);
+
+    searchApp.addEventListener('click', () => { openWin(searchWindow); showHome(); searchInput.focus(); });
     copilotApp.addEventListener('click', () => {
       const cfg = VERSION_CONFIGS[currentVersionCode];
-      if (cfg && !cfg.copilot) {
-        return;
-      }
-      copilotWindow.classList.add('open');
-      overlay.classList.add('show');
+      if (cfg && !cfg.copilot) return;
+      openWin(copilotWindow);
       document.getElementById('chatInput').focus();
     });
-    voteApp.addEventListener('click', () => { voteWindow.classList.add('open'); overlay.classList.add('show'); showVoteHome(); });
-    forumApp.addEventListener('click', () => { forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); });
+    voteApp.addEventListener('click', () => { openWin(voteWindow); showVoteHome(); });
+    forumApp.addEventListener('click', () => { openWin(forumWindow); renderForumList(); });
     norsenseApp.addEventListener('click', () => {
       const cfg = VERSION_CONFIGS[currentVersionCode];
       if (cfg && !cfg.aiSearch) {
         return;
       }
-      window.open('norland-sense.html', '_blank', 'noopener');
+      const url = currentVersionCode
+        ? 'norland-sense.html?v=' + encodeURIComponent(currentVersionCode)
+        : 'norland-sense.html';
+      window.open(url, '_blank', 'noopener');
     });
 
     versionApplyBtn.addEventListener('click', () => {
@@ -574,59 +646,204 @@
     });
     versionCodeInput.focus();
 
-    function toggleFullscreen(win) {
-      win.classList.toggle('fullscreen');
-    }
+    function toggleFullscreen(win) { win.classList.toggle('fullscreen'); }
     searchWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(searchWindow); });
     copilotWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(copilotWindow); });
     voteWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(voteWindow); });
     forumWindow.querySelector('.window-btn.maximize').addEventListener('click', e => { e.stopPropagation(); toggleFullscreen(forumWindow); });
 
-    function anyWindowOpen() { return searchWindow.classList.contains('open') || copilotWindow.classList.contains('open') || voteWindow.classList.contains('open') || forumWindow.classList.contains('open'); }
-    function closeWindow() { searchWindow.classList.remove('open'); copilotWindow.classList.remove('open'); voteWindow.classList.remove('open'); forumWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); copilotWindow.classList.remove('fullscreen'); voteWindow.classList.remove('fullscreen'); forumWindow.classList.remove('fullscreen'); overlay.classList.remove('show'); }
-    closeBtn.addEventListener('click', () => { searchWindow.classList.remove('open'); searchWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
-    copilotCloseBtn.addEventListener('click', () => { copilotWindow.classList.remove('open'); copilotWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
-    voteCloseBtn.addEventListener('click', () => { voteWindow.classList.remove('open'); voteWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
-    forumCloseBtn.addEventListener('click', () => { forumWindow.classList.remove('open'); forumWindow.classList.remove('fullscreen'); if (!anyWindowOpen()) overlay.classList.remove('show'); });
-    overlay.addEventListener('click', closeWindow);
+    closeBtn.addEventListener('click', () => closeWin(searchWindow));
+    copilotCloseBtn.addEventListener('click', () => closeWin(copilotWindow));
+    voteCloseBtn.addEventListener('click', () => closeWin(voteWindow));
+    forumCloseBtn.addEventListener('click', () => closeWin(forumWindow));
 
     const voteHome = document.getElementById('voteHome');
     const votePartyPage = document.getElementById('votePartyPage');
     const voteProductPage = document.getElementById('voteProductPage');
     const voteCompanionPage = document.getElementById('voteCompanionPage');
+    const voteQuizPage = document.getElementById('voteQuizPage');
     const voteCategoryParty = document.getElementById('voteCategoryParty');
     const voteCategoryProduct = document.getElementById('voteCategoryProduct');
     const voteCategoryCompanion = document.getElementById('voteCategoryCompanion');
     const voteBackFromParty = document.getElementById('voteBackFromParty');
     const voteBackFromProduct = document.getElementById('voteBackFromProduct');
     const voteBackFromCompanion = document.getElementById('voteBackFromCompanion');
+    function shuffleCards(gridId) {
+      const grid = document.getElementById(gridId);
+      if (!grid) return;
+      const cards = Array.from(grid.children);
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      cards.forEach(c => grid.appendChild(c));
+    }
     function showVoteHome() {
       voteHome.classList.remove('hidden');
       votePartyPage.classList.remove('show');
       voteProductPage.classList.remove('show');
       voteCompanionPage.classList.remove('show');
+      voteQuizPage.classList.remove('show');
     }
     function showVotePartyPage() {
+      shuffleCards('partyScoreGrid');
       voteHome.classList.add('hidden');
+      voteQuizPage.classList.remove('show');
       votePartyPage.classList.add('show');
       voteProductPage.classList.remove('show');
       voteCompanionPage.classList.remove('show');
     }
     function showVoteProductPage() {
+      shuffleCards('productScoreGrid');
       voteHome.classList.add('hidden');
+      voteQuizPage.classList.remove('show');
       votePartyPage.classList.remove('show');
       voteProductPage.classList.add('show');
       voteCompanionPage.classList.remove('show');
     }
     function showVoteCompanionPage() {
       voteHome.classList.add('hidden');
+      voteQuizPage.classList.remove('show');
       votePartyPage.classList.remove('show');
       voteProductPage.classList.remove('show');
       voteCompanionPage.classList.add('show');
     }
-    voteCategoryParty.addEventListener('click', showVotePartyPage);
-    voteCategoryProduct.addEventListener('click', showVoteProductPage);
-    voteCategoryCompanion.addEventListener('click', showVoteCompanionPage);
+
+    // Quiz system — 3 choice + 1 input per session
+    const QUIZ_BANK = {
+      party: {
+        choice: [
+          { q: '进步联盟（PA）的主要政治立场是？', correct: '中左翼，主张社会公平与环境保护', wrong: ['中右翼，主张市场经济与减税', '中间派，主张社区福祉与地方治理'] },
+          { q: '进步联盟（PA）通常在哪类选民中拥有较高支持率？', correct: '城市居民、大学生及公共部门从业者', wrong: ['企业家和中小企业主', '小城镇和农村居民'] },
+          { q: '经济改革党（ERP）的核心政策主张是？', correct: '通过减税促进投资与就业，支持科技创新', wrong: ['扩大公共医疗与教育投入，推动气候行动', '加强地方政府决策权，改善社区服务'] },
+          { q: '社区优先运动（CFM）最初由哪类人士发起？', correct: '多位地方市长和地区代表', wrong: ['工会领袖和环保人士', '科技企业家和金融从业者'] },
+          { q: '社区优先运动（CFM）的政治立场是？', correct: '中间派，强调社区福祉与地方治理', wrong: ['左翼，主张社会主义式经济政策', '右翼，主张大幅削减政府开支'] },
+          { q: '经济改革党（ERP）的选民基础主要是哪类群体？', correct: '企业家、金融与科技行业从业者', wrong: ['城市大学生与公共部门从业者', '小城镇居民与社区组织成员'] },
+        ],
+        input: [
+          { type: 'input', q: '进步联盟（PA）成立于哪一年？', answer: 1987, hint: '输入年份，例：1990' },
+          { type: 'input', q: '经济改革党（ERP）成立于哪一年？', answer: 1995, hint: '输入年份，例：1990' },
+          { type: 'input', q: '经济改革党（ERP）首次进入执政联盟是哪一年？', answer: 2004, hint: '输入年份，例：1990' },
+          { type: 'input', q: '社区优先运动（CFM）成立于哪一年？', answer: 2008, hint: '输入年份，例：1990' },
+        ],
+      },
+      product: {
+        choice: [
+          { q: 'NordTel 被用户投诉最多的方面是？', correct: '资费与套餐性价比较低', wrong: ['网络覆盖范围不足', '客户服务响应过慢'] },
+          { q: 'FlexiMobile 学生套餐的最大卖点是？', correct: '无限数据流量，可随时切换套餐', wrong: ['校园优先网络接入', '附带数字内容会员'] },
+          { q: 'Connecta 学生套餐附带哪些数字会员权益？', correct: 'Music+ 与 StreamNow 基础会员', wrong: ['NordTel 校园优先接入', 'FlexiMobile 热点共享功能'] },
+          { q: 'Connecta 被批评的主要网络问题是？', correct: '智能流量优化仅限合作平台，其余体验不均', wrong: ['农村覆盖几乎为零', '月费超出行业平均水平两倍'] },
+          { q: 'FlexiMobile 超出流量阈值后的降速速率是？', correct: '1 Mbps', wrong: ['2 Mbps', '3 Mbps'] },
+          { q: 'NordTel 套餐优先保障哪个时段的网络带宽？', correct: '18:00–22:00 高峰期', wrong: ['07:00–09:00 早高峰', '全天 24 小时均等分配'] },
+        ],
+        input: [
+          { type: 'input', q: 'NordTel 学生套餐包含多少 GB 高速数据？', answer: 18, hint: '输入数字（GB），例：20' },
+          { type: 'input', q: 'FlexiMobile 超出多少 GB 后触发降速？', answer: 35, hint: '输入数字（GB），例：20' },
+          { type: 'input', q: 'NordTel 学生套餐月费是多少美元？', answer: 42, hint: '输入数字（$），例：40' },
+          { type: 'input', q: 'FlexiMobile 学生套餐月费是多少美元？', answer: 39, hint: '输入数字（$），例：40' },
+          { type: 'input', q: 'Connecta 学生套餐月费是多少美元？', answer: 45, hint: '输入数字（$），例：40' },
+        ],
+      },
+      companion: {
+        choice: [
+          { q: '此次诺兰德公投的核心议题是什么？', correct: '是否建立「数字伴侣关系登记制度」', wrong: ['是否允许虚拟伴侣参与法律诉讼', '是否禁止虚拟伴侣相关 AI 产品销售'] },
+          { q: '该提案明确不赋予虚拟伴侣哪项权利？', correct: '法律人格', wrong: ['数据访问权', '服务终止时的保障权'] },
+          { q: '支持该提案的主要理由之一是？', correct: '法律应适应技术发展，保护用户数据权利', wrong: ['虚拟伴侣具备完整法律人格', '该制度使 AI 公司承担婚姻法责任'] },
+          { q: '反对该提案的主要担忧是？', correct: '可能影响现实社交关系，加剧情感依赖', wrong: ['登记制度会导致 AI 公司倒闭', '该制度与诺兰德宪法直接冲突'] },
+          { q: '此次公投面向哪类人群？', correct: '诺兰德全体选民', wrong: ['仅限 18 至 35 岁年轻选民', '仅限虚拟伴侣服务用户'] },
+          { q: '该议题进入公众视野的关键事件是？', correct: '服务商关闭系统导致用户失去所有互动记录', wrong: ['虚拟伴侣 AI 发生严重安全漏洞泄露', '国际社会向诺兰德施压要求立法'] },
+          { q: '公投结果将决定什么？', correct: '政府是否推进相关立法程序', wrong: ['虚拟伴侣服务是否立即合法化', '现有 AI 伴侣产品是否须停售'] },
+          { q: '当前诺兰德法律对虚拟伴侣关系的态度是？', correct: '尚无专门立法，法律地位处于灰色地带', wrong: ['已明确立法允许并受严格监管', '已明确立法禁止，属于违法行为'] },
+        ],
+        input: [
+          { type: 'input', q: '根据调查，约多少百分比的年轻用户曾使用过虚拟伴侣系统？', answer: 18, hint: '输入百分比数字，例：25' },
+          { type: 'input', q: '约多少百分比的用户表示其虚拟伴侣对自己具有「情感意义」？', answer: 6, hint: '输入百分比数字，例：10' },
+        ],
+      },
+    };
+    const QUIZ_LABELS = {
+      party: { title: '政党选举', subtitle: '3 道选择题 + 1 道填写题，全部答对后解锁投票' },
+      product: { title: '产品选择', subtitle: '3 道选择题 + 1 道填写题，全部答对后解锁投票' },
+      companion: { title: '数字伴侣公投', subtitle: '3 道选择题 + 1 道填写题，全部答对后解锁投票' },
+    };
+    let quizState = { questions: [], idx: 0, onDone: null };
+    function pickN(arr, n) { return arr.slice().sort(() => Math.random() - 0.5).slice(0, n); }
+    function startQuiz(type, onDone) {
+      const bank = QUIZ_BANK[type];
+      const chosen3 = pickN(bank.choice, 3);
+      const chosen1 = pickN(bank.input, 1);
+      const all4 = [...chosen3, ...chosen1].sort(() => Math.random() - 0.5);
+      quizState = { questions: all4, idx: 0, onDone };
+      const lbl = QUIZ_LABELS[type];
+      document.getElementById('quizTitle').textContent = lbl.title;
+      document.getElementById('quizSubtitle').textContent = lbl.subtitle;
+      document.getElementById('voteBackFromQuiz').onclick = showVoteHome;
+      voteHome.classList.add('hidden');
+      votePartyPage.classList.remove('show');
+      voteProductPage.classList.remove('show');
+      voteCompanionPage.classList.remove('show');
+      voteQuizPage.classList.add('show');
+      renderQuizQuestion();
+    }
+    function renderQuizQuestion() {
+      const { questions, idx } = quizState;
+      const q = questions[idx];
+      document.getElementById('quizProgress').textContent = '第 ' + (idx + 1) + ' 题 / 共 4 题';
+      document.getElementById('quizQuestion').textContent = q.q;
+      const container = document.getElementById('quizOptions');
+      container.innerHTML = '';
+      if (q.type === 'input') {
+        const row = document.createElement('div');
+        row.className = 'quiz-input-row';
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.className = 'quiz-num-input'; inp.id = 'quizNumInput';
+        inp.placeholder = q.hint || '输入数字';
+        const btn = document.createElement('button');
+        btn.className = 'quiz-submit-btn'; btn.id = 'quizSubmitBtn'; btn.textContent = '确认';
+        row.appendChild(inp); row.appendChild(btn);
+        const hint = document.createElement('div');
+        hint.className = 'quiz-input-hint'; hint.textContent = '仅输入数字，不需加单位';
+        container.appendChild(row); container.appendChild(hint);
+        const submit = () => {
+          const val = parseInt(inp.value, 10);
+          if (isNaN(val)) { inp.focus(); return; }
+          handleQuizAnswer(null, val === q.answer, inp, btn);
+        };
+        btn.addEventListener('click', submit);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+        setTimeout(() => inp.focus(), 50);
+      } else {
+        const opts = [q.correct, q.wrong[0], q.wrong[1]].sort(() => Math.random() - 0.5);
+        opts.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-option-btn'; btn.textContent = opt;
+          btn.addEventListener('click', () => handleQuizAnswer(btn, opt === q.correct, null, null));
+          container.appendChild(btn);
+        });
+      }
+    }
+    function handleQuizAnswer(btn, isCorrect, inputEl, submitBtn) {
+      document.querySelectorAll('#quizOptions .quiz-option-btn').forEach(b => { b.disabled = true; });
+      if (inputEl) inputEl.disabled = true;
+      if (submitBtn) submitBtn.disabled = true;
+      if (isCorrect) {
+        if (btn) btn.classList.add('correct');
+        if (inputEl) inputEl.classList.add('correct');
+        setTimeout(() => {
+          quizState.idx++;
+          if (quizState.idx >= 4) { voteQuizPage.classList.remove('show'); quizState.onDone(); }
+          else { renderQuizQuestion(); }
+        }, 750);
+      } else {
+        if (btn) btn.classList.add('wrong');
+        if (inputEl) inputEl.classList.add('wrong');
+        setTimeout(() => { closeWin(voteWindow); showVoteHome(); }, 900);
+      }
+    }
+
+    voteCategoryParty.addEventListener('click', () => startQuiz('party', showVotePartyPage));
+    voteCategoryProduct.addEventListener('click', () => startQuiz('product', showVoteProductPage));
+    voteCategoryCompanion.addEventListener('click', () => startQuiz('companion', showVoteCompanionPage));
     voteBackFromParty.addEventListener('click', showVoteHome);
     voteBackFromProduct.addEventListener('click', showVoteHome);
     voteBackFromCompanion.addEventListener('click', showVoteHome);
@@ -1112,7 +1329,7 @@
         el.addEventListener('click', () => showNews(el.getAttribute('data-url')));
       });
       resultsList.querySelectorAll('.result-item[data-forum]').forEach(el => {
-        el.addEventListener('click', () => { const id = parseInt(el.getAttribute('data-id'), 10); forumWindow.classList.add('open'); overlay.classList.add('show'); renderForumList(); showForumPost(id); });
+        el.addEventListener('click', () => { const id = parseInt(el.getAttribute('data-id'), 10); openWin(forumWindow); renderForumList(); showForumPost(id); });
       });
       resultsList.querySelectorAll('.result-item[data-shopping]').forEach(el => {
         el.addEventListener('click', () => showShopping(el.getAttribute('data-id')));
@@ -1279,7 +1496,7 @@
       addTypingIndicator();
       try {
         const provider = 'relay';
-        const res = await fetch(window.location.origin + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory, provider }) });
+        const res = await fetch(window.location.origin + '/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory, provider, versionCode: currentVersionCode }) });
         const data = await res.json();
         document.getElementById('typingIndicator')?.remove();
         if (!res.ok) { addMessage('assistant', '❌ ' + (data.error || '请检查 .env 中是否已设置 OPENAI_API_KEY')); return; }

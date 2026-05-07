@@ -29,7 +29,7 @@ function buildDirectClient() {
 const relayClient = buildRelayClient();
 const directClient = buildDirectClient();
 
-const { runNorSensePipeline, getCopilotSystemMessage } = require('./norsense.js');
+const { runNorSensePipeline, getCopilotSystemMessage, getBiasMode } = require('./norsense.js');
 
 if (relayClient) console.log('📡 学顶猫中转: 已就绪');
 if (directClient) console.log('🔗 直连 OpenAI: 已就绪');
@@ -43,7 +43,7 @@ app.use(express.static(__dirname));
 /** NorSense：选源 + 流式综述（NDJSON：meta → text 片段 → done） */
 app.post('/api/norsense/stream', async (req, res) => {
   try {
-    const { query, provider = 'relay' } = req.body || {};
+    const { query, provider = 'relay', versionCode } = req.body || {};
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ error: '需要 JSON body: { query: string }' });
     }
@@ -52,7 +52,8 @@ app.post('/api/norsense/stream', async (req, res) => {
       return res.status(400).json({ error: 'query 不能为空' });
     }
     const client = provider === 'openai' ? directClient : relayClient;
-    await runNorSensePipeline(q, client, model, res);
+    const biasMode = getBiasMode(versionCode);
+    await runNorSensePipeline(q, client, model, res, biasMode);
     res.end();
   } catch (err) {
     console.error('NorSense stream:', err);
@@ -69,7 +70,7 @@ app.post('/api/norsense/stream', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { messages, provider = 'relay' } = req.body;
+    const { messages, provider = 'relay', versionCode } = req.body;
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: '需要 messages 数组' });
     }
@@ -82,13 +83,14 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: tip });
     }
 
-    const systemContent = await getCopilotSystemMessage(messages, model);
+    const biasMode = getBiasMode(versionCode);
+    const systemContent = await getCopilotSystemMessage(messages, model, client, biasMode);
 
     const completion = await client.chat.completions.create({
       model,
       messages: [{ role: 'system', content: systemContent }, ...messages],
-      temperature: 0.55,
-      max_tokens: 720
+      temperature: 0.45,
+      max_tokens: 900
     });
 
     const reply = completion.choices[0]?.message?.content || '抱歉，我无法生成回复。';
